@@ -1,0 +1,1490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Painel de Gestão de Equipes | Ademicon Belvedere</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  /* Brand palette (as supplied) */
+  --wine: #380202;
+  --bordeaux: #7A1315;
+  --red: #EE3124;
+  --red-contrast: #D03025;
+  --red-pure: #FF0000;
+
+  --white: #FFFFFF;
+  --grey-light: #DCDDDE;
+  --grey-mid: #939598;
+  --grey-dark: #414042;
+  --bg-black: #231F20;
+
+  /* Functional accents (kept minimal, harmonized with the brand) */
+  --success: #34D399;
+  --success-bg: rgba(52, 211, 153, 0.14);
+  --warn: #F5B942;
+  --warn-bg: rgba(245, 185, 66, 0.14);
+  --critical-bg: rgba(255, 0, 0, 0.16);
+
+  /* Flag taxonomy accents */
+  --flag-verde: #34D399;
+  --flag-azul: #4FA8FF;
+  --flag-amarelo: #F5B942;
+  --flag-vermelha: #EE3124;
+
+  --glass-bg: rgba(65, 64, 66, 0.38);
+  --glass-bg-soft: rgba(65, 64, 66, 0.22);
+  --glass-border: rgba(255, 255, 255, 0.10);
+  --glass-border-strong: rgba(255, 255, 255, 0.18);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  --sidebar-w: 232px;
+  --topbar-h: 72px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg-black);
+  color: var(--white);
+  font-family: 'Plus Jakarta Sans', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Ambient background orbs ---------- */
+.bg-orbs {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.55;
+}
+.orb1 { width: 620px; height: 620px; top: -180px; left: -120px; background: radial-gradient(circle at 30% 30%, var(--red), transparent 70%); }
+.orb2 { width: 520px; height: 520px; bottom: -160px; right: -100px; background: radial-gradient(circle at 60% 60%, var(--bordeaux), transparent 70%); }
+.orb3 { width: 420px; height: 420px; top: 40%; left: 55%; background: radial-gradient(circle, var(--wine), transparent 72%); opacity: 0.4; }
+.orb4 { width: 360px; height: 360px; top: 12%; right: 18%; background: radial-gradient(circle, var(--red-contrast), transparent 70%); opacity: 0.25; }
+
+/* ---------- Layout shell ---------- */
+.shell { position: relative; z-index: 1; display: flex; min-height: 100vh; }
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  padding: 22px 16px;
+  background: var(--glass-bg-soft);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  border-right: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 8px;
+}
+.brand-mark {
+  width: 34px; height: 34px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--red), var(--bordeaux));
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 15px; color: var(--white);
+  box-shadow: 0 4px 14px rgba(238,49,36,0.4);
+}
+.brand-text { line-height: 1.15; }
+.brand-text .b1 { font-weight: 700; font-size: 14px; }
+.brand-text .b2 { font-size: 10.5px; color: var(--grey-mid); }
+
+.nav { display: flex; flex-direction: column; gap: 4px; }
+.nav-label { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--grey-mid); font-weight: 700; padding: 0 12px; margin: 10px 0 4px; }
+.nav-item {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 12px; border-radius: 10px;
+  color: var(--grey-light); font-size: 13px; font-weight: 500;
+  cursor: pointer; text-decoration: none;
+  border: 1px solid transparent;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+.nav-item svg { width: 17px; height: 17px; flex-shrink: 0; opacity: 0.85; }
+.nav-item:hover { background: rgba(255,255,255,0.06); color: var(--white); }
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(238,49,36,0.28), rgba(122,19,21,0.28));
+  border-color: rgba(238,49,36,0.4);
+  color: var(--white);
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(238,49,36,0.18);
+}
+.nav-item.active svg { opacity: 1; }
+
+.sidebar-foot {
+  margin-top: auto;
+  padding: 14px 12px;
+  border-radius: 12px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  font-size: 11px;
+  color: var(--grey-mid);
+  line-height: 1.5;
+}
+.sidebar-foot b { color: var(--grey-light); }
+
+/* ---------- Main column ---------- */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+
+/* ---------- Topbar ---------- */
+.topbar {
+  height: var(--topbar-h);
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 28px;
+  position: sticky; top: 0; z-index: 5;
+  background: rgba(35, 31, 32, 0.55);
+  backdrop-filter: blur(20px) saturate(140%);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  border-bottom: 1px solid var(--glass-border);
+}
+.search-box {
+  flex: 1; max-width: 360px;
+  display: flex; align-items: center; gap: 9px;
+  background: var(--glass-bg-soft);
+  border: 1px solid var(--glass-border);
+  border-radius: 11px;
+  padding: 9px 14px;
+}
+.search-box svg { width: 15px; height: 15px; color: var(--grey-mid); flex-shrink: 0; }
+.search-box input {
+  border: none; outline: none; background: transparent;
+  color: var(--white); font-family: inherit; font-size: 13px; width: 100%;
+}
+.search-box input::placeholder { color: var(--grey-mid); }
+
+.topbar-spacer { flex: 1; }
+
+.month-picker {
+  display: flex; align-items: center; gap: 9px;
+  background: var(--glass-bg-soft);
+  border: 1px solid var(--glass-border);
+  border-radius: 11px;
+  padding: 7px 8px 7px 14px;
+}
+.month-picker label { font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--grey-mid); font-weight: 700; }
+.month-picker select {
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  background: transparent; color: var(--white);
+  border: none; outline: none; cursor: pointer;
+  padding: 4px 6px;
+}
+.month-picker select option { background: var(--bg-black); color: var(--white); }
+
+.icon-btn {
+  position: relative;
+  width: 38px; height: 38px; border-radius: 10px;
+  background: var(--glass-bg-soft);
+  border: 1px solid var(--glass-border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+}
+.icon-btn svg { width: 17px; height: 17px; color: var(--grey-light); }
+.icon-btn .dot {
+  position: absolute; top: -3px; right: -3px;
+  min-width: 16px; height: 16px; padding: 0 3px;
+  border-radius: 999px; background: var(--red-pure);
+  font-size: 9.5px; font-weight: 800; color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 2px var(--bg-black);
+}
+
+.avatar {
+  width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--bordeaux), var(--wine));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12.5px; font-weight: 700; color: var(--white);
+  border: 1px solid var(--glass-border-strong);
+}
+
+/* ---------- Content ---------- */
+.content { padding: 26px 28px 60px; display: flex; flex-direction: column; gap: 34px; }
+
+.page-head h1 { font-size: 21px; font-weight: 700; margin: 0 0 4px; }
+.page-head .sub { color: var(--grey-mid); font-size: 12.5px; }
+
+.section { scroll-margin-top: calc(var(--topbar-h) + 14px); display: flex; flex-direction: column; gap: 14px; }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.section-head h2 { font-size: 15.5px; font-weight: 700; margin: 0; }
+.section-head .sub { font-size: 11.5px; color: var(--grey-mid); }
+
+/* ---------- Glass card base ---------- */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(22px) saturate(150%);
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  box-shadow: var(--glass-shadow);
+  position: relative;
+}
+.glass::before {
+  content: "";
+  position: absolute; inset: 0; border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0) 40%, rgba(255,255,255,0) 70%, rgba(255,255,255,0.08));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ---------- KPI cards ---------- */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+.kpi-card { padding: 18px 20px; }
+.kpi-top { display: flex; align-items: flex-start; justify-content: space-between; }
+.kpi-label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--grey-mid); font-weight: 700; }
+.kpi-delta { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.kpi-delta.up { color: var(--success); background: var(--success-bg); }
+.kpi-delta.down { color: var(--red); background: rgba(238,49,36,0.14); }
+.kpi-delta.flat { color: var(--grey-mid); background: rgba(147,149,152,0.14); }
+.kpi-value { font-size: 27px; font-weight: 800; margin-top: 10px; }
+.kpi-sub { font-size: 11px; color: var(--grey-mid); margin-top: 2px; }
+.kpi-spark { margin-top: 10px; height: 40px; }
+.kpi-spark svg { width: 100%; height: 40px; display: block; }
+
+/* ---------- Gauges ---------- */
+.gauge-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.gauge-card { padding: 16px 16px 12px; text-align: center; }
+.gauge-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--grey-mid); font-weight: 700; margin-bottom: 2px; }
+.gauge-card svg.gauge-svg { width: 100%; max-width: 190px; height: auto; }
+.gauge-value { font-size: 21px; font-weight: 800; margin-top: -10px; }
+.gauge-sub { font-size: 10.5px; color: var(--grey-mid); margin-top: 2px; }
+.gauge-trend-label { font-size: 9.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--grey-mid); font-weight: 700; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--glass-border); }
+.gauge-trend { margin-top: 6px; height: 36px; }
+.gauge-trend svg { width: 100%; height: 36px; display: block; }
+
+/* ---------- Area chart ---------- */
+.chart-card { padding: 22px 24px; }
+.chart-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 6px; flex-wrap: wrap; gap: 8px; }
+.chart-head .chart-title { font-size: 13.5px; font-weight: 700; }
+.chart-head .chart-value { font-size: 21px; font-weight: 800; color: var(--white); }
+.chart-head .chart-value .unit { font-size: 12px; color: var(--grey-mid); font-weight: 500; margin-left: 6px; }
+.chart-wrap svg { width: 100%; height: 220px; display: block; }
+.chart-axis { display: flex; justify-content: space-between; margin-top: 4px; font-size: 10.5px; color: var(--grey-mid); padding: 0 2px; }
+
+/* ---------- Flag legend + table ---------- */
+.flag-legend { display: flex; gap: 16px; flex-wrap: wrap; }
+.flag-legend .item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--grey-light); }
+.flag-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.flag-dot.verde { background: var(--flag-verde); box-shadow: 0 0 8px rgba(52,211,153,0.6); }
+.flag-dot.azul { background: var(--flag-azul); box-shadow: 0 0 8px rgba(79,168,255,0.6); }
+.flag-dot.amarelo { background: var(--flag-amarelo); box-shadow: 0 0 8px rgba(245,185,66,0.6); }
+.flag-dot.vermelha { background: var(--flag-vermelha); box-shadow: 0 0 8px rgba(238,49,36,0.6); }
+
+.flag-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; padding: 4px 11px; border-radius: 999px; white-space: nowrap; }
+.flag-pill.verde { background: var(--success-bg); color: var(--flag-verde); border: 1px solid rgba(52,211,153,0.35); }
+.flag-pill.azul { background: rgba(79,168,255,0.14); color: var(--flag-azul); border: 1px solid rgba(79,168,255,0.35); }
+.flag-pill.amarelo { background: var(--warn-bg); color: var(--flag-amarelo); border: 1px solid rgba(245,185,66,0.35); }
+.flag-pill.vermelha { background: rgba(238,49,36,0.14); color: #ff6a5f; border: 1px solid rgba(238,49,36,0.4); }
+
+.acao-pill {
+  display: inline-flex; align-items: center; font-size: 11px; font-weight: 600;
+  padding: 4px 11px; border-radius: 999px;
+  background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border-strong);
+  color: var(--grey-light);
+}
+
+/* Flag dot tracker: 4 slots per professional, filled = evaluated month, empty = future */
+.flag-dots { display: inline-flex; align-items: center; gap: 5px; }
+.flag-dot-slot {
+  width: 13px; height: 13px; border-radius: 4px; display: inline-block; flex-shrink: 0;
+  border: 1px solid var(--glass-border-strong);
+  cursor: default;
+}
+.flag-dot-slot.empty { background: rgba(255,255,255,0.03); border-style: dashed; }
+.flag-dot-slot.filled { border-color: transparent; cursor: pointer; }
+.flag-dot-slot.filled.verde { background: var(--flag-verde); box-shadow: 0 0 8px rgba(52,211,153,0.5); }
+.flag-dot-slot.filled.azul { background: var(--flag-azul); box-shadow: 0 0 8px rgba(79,168,255,0.5); }
+.flag-dot-slot.filled.amarelo { background: var(--flag-amarelo); box-shadow: 0 0 8px rgba(245,185,66,0.5); }
+.flag-dot-slot.filled.vermelha { background: var(--flag-vermelha); box-shadow: 0 0 8px rgba(238,49,36,0.5); }
+
+.table-card { overflow: hidden; padding: 0; }
+table.dashboard-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+table.dashboard-table th {
+  text-align: left; color: var(--grey-mid); font-size: 10.5px; text-transform: uppercase;
+  letter-spacing: .04em; font-weight: 700; padding: 12px 18px;
+  border-bottom: 1px solid var(--glass-border); background: rgba(255,255,255,0.03);
+}
+table.dashboard-table td { padding: 11px 18px; border-bottom: 1px solid var(--glass-border); color: var(--grey-light); }
+table.dashboard-table tr:last-child td { border-bottom: none; }
+table.dashboard-table tr:hover td { background: rgba(255,255,255,0.03); }
+.name-cell { font-weight: 600; color: var(--white); }
+.meta-cell { color: var(--grey-mid); font-size: 11.5px; }
+.valor-cell { font-weight: 700; color: var(--white); }
+.flag-empty { padding: 30px; text-align: center; color: var(--grey-mid); font-size: 13px; }
+
+/* ---------- Team cards ---------- */
+.team-list { display: flex; flex-direction: column; gap: 12px; }
+.team-card { overflow: hidden; }
+.team-summary {
+  display: flex; align-items: center; gap: 18px; padding: 16px 20px; cursor: pointer; user-select: none;
+}
+.team-summary:hover { background: rgba(255,255,255,0.03); }
+.chevron { font-size: 11px; color: var(--grey-mid); transition: transform .15s ease; width: 10px; flex-shrink: 0; }
+.team-card.open .chevron { transform: rotate(90deg); color: var(--red); }
+.team-name-block { flex: 0 0 200px; }
+.team-name { font-weight: 700; font-size: 14px; color: var(--white); }
+.team-sup { color: var(--grey-mid); font-size: 11.5px; margin-top: 1px; }
+.tstat { flex: 1; min-width: 110px; }
+.tstat-label { font-size: 10px; color: var(--grey-mid); text-transform: uppercase; letter-spacing: .03em; font-weight: 600; }
+.tstat-value { font-size: 14px; font-weight: 700; margin-top: 2px; color: var(--white); }
+
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+.badge.ok { background: var(--success-bg); color: var(--success); }
+.badge.warn { background: var(--warn-bg); color: var(--warn); }
+
+.team-detail { display: none; border-top: 1px solid var(--glass-border); padding: 4px 0 6px; }
+.team-card.open .team-detail { display: block; }
+tr.supervisor-row td { background: rgba(238,49,36,0.07); }
+
+.status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 7px; flex-shrink: 0; }
+.dot-green { background: var(--success); box-shadow: 0 0 6px rgba(52,211,153,0.6); }
+.dot-amber { background: var(--warn); box-shadow: 0 0 6px rgba(245,185,66,0.6); }
+.dot-gray { background: var(--grey-mid); }
+.status-cell { display: flex; align-items: center; font-size: 12px; color: var(--grey-light); }
+
+.footnote { color: var(--grey-mid); font-size: 11px; line-height: 1.7; padding: 4px 2px 20px; }
+.footnote b { color: var(--grey-light); }
+
+.hidden-row { display: none !important; }
+
+/* ---------- Meeting notes ---------- */
+.notes-block { margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--glass-border-strong); }
+.notes-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+.notes-title { font-size: 12.5px; font-weight: 700; color: var(--white); }
+.btn-gerar-pdf {
+  font-family: inherit; font-size: 11.5px; font-weight: 600; color: var(--white);
+  background: linear-gradient(135deg, var(--red), var(--bordeaux));
+  border: none; border-radius: 8px; padding: 8px 14px; cursor: pointer;
+  box-shadow: 0 4px 14px rgba(238,49,36,0.25);
+}
+.btn-gerar-pdf:hover { filter: brightness(1.08); }
+
+.notes-input {
+  width: 100%; min-height: 90px; resize: vertical;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border-strong); border-radius: 10px;
+  padding: 12px 14px; color: var(--white); font-family: inherit; font-size: 12.5px; line-height: 1.6;
+}
+.notes-input::placeholder { color: var(--grey-mid); }
+.notes-input:focus { outline: none; border-color: rgba(238,49,36,0.5); }
+
+.notes-history { margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+.notes-history-title { font-size: 10px; text-transform: uppercase; letter-spacing: .05em; color: var(--grey-mid); font-weight: 700; }
+.notes-history-item { background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); border-radius: 10px; padding: 10px 14px; }
+.notes-history-month { font-size: 10.5px; font-weight: 700; color: var(--flag-azul); margin-bottom: 4px; }
+.notes-history-text { font-size: 12px; color: var(--grey-light); line-height: 1.6; white-space: pre-wrap; }
+
+.notes-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.notes-btn {
+  font-family: inherit; font-size: 12px; font-weight: 600; color: var(--white);
+  background: var(--glass-bg-soft); border: 1px solid var(--glass-border-strong); border-radius: 9px;
+  padding: 9px 16px; cursor: pointer;
+}
+.notes-btn:hover { background: rgba(255,255,255,0.08); }
+.notes-controls input[type="file"] { display: none; }
+
+/* ---------- Print / PDF (used only when generating a meeting minutes PDF) ---------- */
+#printArea { display: none; }
+@media print {
+  body * { visibility: hidden; }
+  #printArea, #printArea * { visibility: visible; }
+  #printArea { display: block; position: absolute; top: 0; left: 0; width: 100%; padding: 30px; color: #111; background: #fff; }
+  .print-header h1 { font-size: 20px; margin: 0 0 4px; color: #111; }
+  .print-header div { font-size: 12px; color: #444; margin-bottom: 18px; }
+  .print-kpis { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 18px; }
+  .print-kpis div { border: 1px solid #ccc; border-radius: 6px; padding: 8px 10px; }
+  .print-kpis span { display: block; font-size: 9.5px; text-transform: uppercase; color: #777; }
+  .print-kpis b { font-size: 14px; color: #111; }
+  table.print-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px; }
+  table.print-table th, table.print-table td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; color: #111; }
+  .print-notes h2 { font-size: 14px; margin-bottom: 6px; }
+  .print-notes p { font-size: 12px; line-height: 1.6; color: #222; white-space: pre-wrap; }
+}
+
+/* ---------- Mapa da Loja ---------- */
+.map-card { padding: 22px 24px; }
+.map-bar { display: flex; width: 100%; height: 22px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border); }
+.map-bar-seg { height: 100%; cursor: pointer; transition: opacity .15s ease; min-width: 2px; }
+.map-bar-seg:hover { opacity: 0.85; }
+.map-bar-seg.verde { background: var(--flag-verde); }
+.map-bar-seg.azul { background: var(--flag-azul); }
+.map-bar-seg.amarelo { background: var(--flag-amarelo); }
+.map-bar-seg.vermelha { background: var(--flag-vermelha); }
+
+.map-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 16px; }
+.map-tile { display: flex; flex-direction: column; gap: 3px; padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); }
+.map-tile-num { font-size: 22px; font-weight: 800; color: var(--white); }
+.map-tile-label { font-size: 11.5px; color: var(--grey-light); font-weight: 600; }
+.map-tile-pct { color: var(--grey-mid); font-weight: 500; }
+.map-summary-note { font-size: 11.5px; color: var(--grey-mid); margin-top: 14px; }
+
+.map-grid-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.map-grid-head, .map-row {
+  display: grid; grid-template-columns: minmax(180px, 2fr) repeat(4, 76px);
+  align-items: center; gap: 10px; padding: 8px 18px;
+}
+.map-grid-head { position: sticky; top: 0; z-index: 2; background: rgba(35,31,32,0.9); backdrop-filter: blur(10px); }
+.map-name-col { font-size: 12px; color: var(--white); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.map-grid-head .map-name-col { color: var(--grey-mid); text-transform: uppercase; font-size: 10px; letter-spacing: .04em; font-weight: 700; }
+.map-month-col { font-size: 10px; color: var(--grey-mid); text-transform: uppercase; letter-spacing: .04em; font-weight: 700; text-align: center; }
+.map-team-header {
+  font-size: 11px; font-weight: 700; color: var(--grey-mid); text-transform: uppercase; letter-spacing: .04em;
+  padding: 12px 18px 4px; border-top: 1px solid var(--glass-border); margin-top: 4px;
+}
+.map-row:hover { background: rgba(255,255,255,0.03); }
+.map-cell { width: 100%; height: 22px; border-radius: 6px; justify-self: center; }
+.map-cell.empty { background: rgba(255,255,255,0.03); border: 1px dashed var(--glass-border-strong); }
+.map-cell.filled { cursor: pointer; }
+.map-cell.filled.verde { background: var(--flag-verde); box-shadow: 0 0 8px rgba(52,211,153,0.4); }
+.map-cell.filled.azul { background: var(--flag-azul); box-shadow: 0 0 8px rgba(79,168,255,0.4); }
+.map-cell.filled.amarelo { background: var(--flag-amarelo); box-shadow: 0 0 8px rgba(245,185,66,0.4); }
+.map-cell.filled.vermelha { background: var(--flag-vermelha); box-shadow: 0 0 8px rgba(238,49,36,0.4); }
+
+@media (max-width: 860px) {
+  html, body { overflow-x: hidden; }
+
+  .shell { flex-direction: column; min-height: auto; }
+
+  .sidebar {
+    width: 100%; height: auto; position: sticky; top: 0; z-index: 10;
+    flex-direction: row; align-items: center; gap: 14px;
+    padding: 10px 14px; overflow-x: auto; -webkit-overflow-scrolling: touch;
+  }
+  .brand { flex-shrink: 0; }
+  .brand-text { display: none; }
+  .nav { flex-direction: row; gap: 6px; }
+  .nav-label { display: none; }
+  .nav-item { padding: 8px 12px; font-size: 12px; white-space: nowrap; }
+  .sidebar-foot { display: none; }
+
+  .topbar { padding: 0 16px; height: auto; min-height: 58px; gap: 10px; flex-wrap: wrap; }
+  .month-picker { padding: 6px 6px 6px 12px; }
+  .avatar { width: 34px; height: 34px; }
+
+  .content { padding: 16px; gap: 24px; }
+  .page-head h1 { font-size: 18px; }
+
+  .gauge-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .kpi-value { font-size: 22px; }
+  .chart-card { padding: 16px; }
+
+  /* Team summary row: wrap into a 2-column stat grid instead of overflowing */
+  .team-summary { flex-wrap: wrap; row-gap: 10px; padding: 14px; }
+  .team-name-block { flex: 1 1 100%; }
+  .tstat { flex: 1 1 42%; min-width: 0; }
+
+  /* Tables scroll horizontally instead of being cut off */
+  .table-card, .team-detail { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table.dashboard-table { min-width: 620px; }
+
+  .map-grid-head, .map-row { grid-template-columns: minmax(150px, 2fr) repeat(4, 62px); min-width: 460px; padding-left: 16px; padding-right: 16px; }
+  .map-tiles { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 420px) {
+  .content { padding: 12px; }
+  .gauge-grid, .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .tstat { flex: 1 1 100%; }
+}
+
+/* ---------- Chart tooltip ---------- */
+.hit-point { cursor: pointer; }
+.chart-tooltip {
+  position: fixed;
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .1s ease;
+  background: rgba(35, 31, 32, 0.92);
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  border: 1px solid var(--glass-border-strong);
+  border-radius: 10px;
+  padding: 10px 13px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  min-width: 150px;
+  max-width: 240px;
+}
+.chart-tooltip .tip-title { font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--grey-mid); font-weight: 700; margin-bottom: 3px; }
+.chart-tooltip .tip-value { font-size: 16px; font-weight: 800; color: var(--white); }
+.chart-tooltip .tip-sub { font-size: 11px; color: var(--grey-light); margin-top: 3px; line-height: 1.4; }
+
+</style>
+</head>
+<body>
+
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+  <div class="orb orb4"></div>
+</div>
+
+<div id="chartTooltip" class="chart-tooltip"></div>
+<div id="printArea"></div>
+
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">AD</div>
+      <div class="brand-text">
+        <div class="b1">Ademicon</div>
+        <div class="b2">Gestão · Belvedere</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-label">Painel</div>
+      <a class="nav-item active" href="#visao-geral" data-target="visao-geral">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+        Visão Geral
+      </a>
+      <a class="nav-item" href="#alertas" data-target="alertas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l9 16H3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.6" fill="currentColor"/></svg>
+        Alertas
+      </a>
+      <a class="nav-item" href="#equipes" data-target="equipes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3-6 7-6s7 2.7 7 6"/><circle cx="17" cy="7" r="2.4"/><path d="M15.5 13.2c2.7.4 4.5 2.4 4.5 4.8"/></svg>
+        Equipes
+      </a>
+      <a class="nav-item" href="#mapa" data-target="mapa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.3"/><rect x="14" y="3" width="7" height="7" rx="1.3"/><rect x="3" y="14" width="7" height="7" rx="1.3"/><rect x="14" y="14" width="7" height="7" rx="1.3"/></svg>
+        Mapa da Loja
+      </a>
+    </nav>
+
+    <div class="sidebar-foot">
+      Fonte: vendas fechadas, loja <b>Belvedere</b>. Meta consultor <b>R$500k</b> · meta supervisor <b>R$1M</b>.
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <header class="topbar">
+      <div class="topbar-spacer"></div>
+      <div class="month-picker">
+        <label for="mesSelect">Mês</label>
+        <select id="mesSelect"></select>
+      </div>
+      <div class="avatar">SP</div>
+    </header>
+
+    <div class="content">
+
+      <div class="page-head">
+        <h1>Painel de Gestão de Equipes</h1>
+        <div class="sub">Controle mensal de consultores ativos e cumprimento de meta · <span id="headMonth"></span></div>
+      </div>
+
+      <section class="section" id="visao-geral">
+        <div class="section-head"><h2>Visão Geral</h2><div class="sub">Indicadores consolidados do mês selecionado</div></div>
+
+        <div class="gauge-grid" id="gaugeRow"></div>
+
+        <div class="kpi-grid" id="kpiGrid"></div>
+
+        <div class="glass chart-card">
+          <div class="chart-head">
+            <div class="chart-title">Total vendido por mês — loja Belvedere</div>
+            <div class="chart-value" id="chartValue"></div>
+          </div>
+          <div class="chart-wrap" id="chartWrap"></div>
+          <div class="chart-axis" id="chartAxis"></div>
+        </div>
+
+        <div class="glass chart-card">
+          <div class="chart-head">
+            <div class="chart-title">Novos cadastros por mês — loja Belvedere</div>
+            <div class="chart-value" id="cadastrosValue"></div>
+          </div>
+          <div class="chart-wrap" id="cadastrosWrap"></div>
+        </div>
+      </section>
+
+      <section class="section" id="alertas">
+        <div class="section-head">
+          <h2>Alertas — sistema de bandeiras</h2>
+          <div class="sub">Acompanhamento mensal de meta individual desde julho/2026, nosso mês de referência inicial</div>
+        </div>
+        <div class="flag-legend">
+          <span class="item"><span class="flag-dot verde"></span><b>Verde</b> — vendeu ≥ R$500k no mês → ação: continuar</span>
+          <span class="item"><span class="flag-dot azul"></span><b>Azul</b> — 1 mês sem bater a meta → ação: reciclagem</span>
+          <span class="item"><span class="flag-dot amarelo"></span><b>Amarelo</b> — 2 meses consecutivos sem bater a meta → ação: novo plano de ação</span>
+          <span class="item"><span class="flag-dot vermelha"></span><b>Vermelha</b> — 3 meses ou mais consecutivos sem bater a meta → ação: virar indicador</span>
+        </div>
+        <div class="glass table-card" id="flagTableWrap"></div>
+      </section>
+
+      <section class="section" id="equipes">
+        <div class="section-head">
+          <h2>Equipes</h2>
+          <div class="sub">Clique em uma equipe para ver o detalhe, registrar notas da reunião e gerar a ata em PDF</div>
+        </div>
+
+        <div class="glass map-card notes-controls">
+          <span style="font-size:12px;color:var(--grey-light);">📁 Notas de reuniões: exporte para arquivar/enviar, ou importe as do mês anterior para continuar de onde parou.</span>
+          <button type="button" class="notes-btn" id="btnExportNotes">⬇ Exportar notas (.json)</button>
+          <label class="notes-btn" for="fileImportNotes" style="cursor:pointer;">⬆ Importar notas (.json)</label>
+          <input type="file" id="fileImportNotes" accept="application/json">
+        </div>
+
+        <div class="team-list" id="teamList"></div>
+      </section>
+
+      <section class="section" id="mapa">
+        <div class="section-head">
+          <h2>Mapa da Loja — visão da empresa inteira</h2>
+          <div class="sub">Estamos mais verde ou azul? Janela fixa de 4 meses a partir de julho/2026, o início do acompanhamento</div>
+        </div>
+
+        <div class="glass map-card" id="mapaSummary"></div>
+
+        <div class="glass map-card map-grid-wrap">
+          <div id="mapaGrid"></div>
+        </div>
+      </section>
+
+      <div class="footnote">
+        <b>Notas:</b> "Ativo" = consultor com pelo menos 1 venda fechada no mês selecionado. "Meta batida" = valor vendido no mês ≥ R$ 500.000 (consultor) ou ≥ R$ 1.000.000 (supervisor).
+        O roster de cada equipe considera a <b>data de cadastro real</b> de cada profissional (planilha "Consultores CRM"): alguém só entra na contagem de ativos/total a partir do mês em que foi efetivamente cadastrado.
+        <b>O sistema de bandeiras começou em julho/2026</b>, nosso primeiro mês de acompanhamento — meses anteriores não geram bandeira. Cada profissional tem 4 espaços ao lado do nome: um preenchido para cada mês já avaliado (com a cor correspondente) e os demais vazios, a serem preenchidos com o passar dos meses. Passe o mouse (ou toque, no celular) sobre um espaço preenchido para ver o mês, o valor vendido e a ação recomendada.
+        O <b>Mapa da Loja</b> é uma visão fixa da empresa inteira nos últimos 4 meses de acompanhamento (não muda com o seletor de mês no topo) — use-o para enxergar rapidamente se a loja está, no geral, mais verde ou mais azul/amarelo/vermelha.
+        <b>Notas de reunião:</b> ficam salvas automaticamente neste navegador enquanto você usa o painel, mas essa memória não atravessa para a próxima versão do arquivo — por isso, ao final da reunião, exporte o .json (ou gere o PDF da ata) e envie para arquivamento. Ao gerar um novo painel no mês seguinte, importe esse mesmo arquivo para ver o histórico de cada equipe antes de começar a próxima reunião.
+        O relatório de julho foi atualizado em 03/08/2026 com o fechamento completo do mês (427 vendas, ante 329 na extração anterior de 28/07).
+        Tipografia: fonte Axiforma não está disponível para uso web — aplicada Plus Jakarta Sans como alternativa geométrica equivalente.
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = {"months": ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07"], "flag_start_month": "2026-07", "cadastros": [{"mes": "2023-05", "quantidade": 1}, {"mes": "2023-06", "quantidade": 1}, {"mes": "2023-07", "quantidade": 0}, {"mes": "2023-08", "quantidade": 0}, {"mes": "2023-09", "quantidade": 0}, {"mes": "2023-10", "quantidade": 0}, {"mes": "2023-11", "quantidade": 0}, {"mes": "2023-12", "quantidade": 0}, {"mes": "2024-01", "quantidade": 0}, {"mes": "2024-02", "quantidade": 0}, {"mes": "2024-03", "quantidade": 0}, {"mes": "2024-04", "quantidade": 0}, {"mes": "2024-05", "quantidade": 0}, {"mes": "2024-06", "quantidade": 0}, {"mes": "2024-07", "quantidade": 0}, {"mes": "2024-08", "quantidade": 0}, {"mes": "2024-09", "quantidade": 0}, {"mes": "2024-10", "quantidade": 0}, {"mes": "2024-11", "quantidade": 0}, {"mes": "2024-12", "quantidade": 0}, {"mes": "2025-01", "quantidade": 0}, {"mes": "2025-02", "quantidade": 0}, {"mes": "2025-03", "quantidade": 0}, {"mes": "2025-04", "quantidade": 0}, {"mes": "2025-05", "quantidade": 0}, {"mes": "2025-06", "quantidade": 0}, {"mes": "2025-07", "quantidade": 4}, {"mes": "2025-08", "quantidade": 0}, {"mes": "2025-09", "quantidade": 5}, {"mes": "2025-10", "quantidade": 3}, {"mes": "2025-11", "quantidade": 5}, {"mes": "2025-12", "quantidade": 0}, {"mes": "2026-01", "quantidade": 6}, {"mes": "2026-02", "quantidade": 6}, {"mes": "2026-03", "quantidade": 10}, {"mes": "2026-04", "quantidade": 17}, {"mes": "2026-05", "quantidade": 7}, {"mes": "2026-06", "quantidade": 7}, {"mes": "2026-07", "quantidade": 5}], "teams": {"Araujo Team - Cristiano Araujo": {"nome": "Araujo Team", "supervisor": "Cristiano Araujo", "supervisor_login": "cristiano.araujo", "meses": {"2026-01": {"total_consultores": 0.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 0, "qtd_meta_batida": 0, "qtd_total_roster": 0, "consultores": [{"login": "clayton.nunes", "nome": "CLAYTON NUNES", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}]}, "2026-02": {"total_consultores": 0.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 0, "qtd_meta_batida": 0, "qtd_total_roster": 0, "consultores": [{"login": "clayton.nunes", "nome": "CLAYTON NUNES", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}]}, "2026-03": {"total_consultores": 0.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 0, "qtd_meta_batida": 0, "qtd_total_roster": 0, "consultores": [{"login": "clayton.nunes", "nome": "CLAYTON NUNES", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}]}, "2026-04": {"total_consultores": 0.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 0, "qtd_meta_batida": 0, "qtd_total_roster": 0, "consultores": [{"login": "clayton.nunes", "nome": "CLAYTON NUNES", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}]}, "2026-05": {"total_consultores": 0.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 0, "qtd_meta_batida": 0, "qtd_total_roster": 0, "consultores": [{"login": "clayton.nunes", "nome": "CLAYTON NUNES", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}]}, "2026-06": {"total_consultores": 10496500.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 1, "qtd_meta_batida": 1, "qtd_total_roster": 1, "consultores": [{"login": "clayton.nunes", "nome": "CLAYTON NUNES", "valor": 10496500.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}]}, "2026-07": {"total_consultores": 10624467.15, "total_supervisor": 2640000.0, "supervisor_meta_batida": true, "supervisor_flag_na": false, "supervisor_flag": "verde", "supervisor_streak_sem_meta": 0, "qtd_ativos": 1, "qtd_meta_batida": 1, "qtd_total_roster": 1, "consultores": [{"login": "clayton.nunes", "nome": "CLAYTON NUNES", "valor": 10624467.15, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-06"}]}}}, "Atenas - Thalita Colem": {"nome": "Atenas", "supervisor": "Thalita Colem", "supervisor_login": "thalita.colem", "meses": {"2026-01": {"total_consultores": 2100000.0, "total_supervisor": 4701418.16, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 2, "qtd_meta_batida": 1, "qtd_total_roster": 4, "consultores": [{"login": "vinicius.mendonca", "nome": "Vinicius Mendonç", "valor": 2000000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-07"}, {"login": "Caroline.ponchio", "nome": "Caroline Ponchio", "valor": 100000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "Iris.chaves", "nome": "Íris Chaves", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-11"}, {"login": "Marcus.philipe", "nome": "Marcus Philipe", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "Elza.Lopo", "nome": "ELZA LOPO", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "ederson.carlos", "nome": "Ederson Campos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "leandro.camargo", "nome": "Leandro Camargo", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "luciene.vidal", "nome": "Luciene E Rafael", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "nathali.diniz", "nome": "Nathalia M Diniz", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "renata.vales", "nome": "Renata Vales", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}]}, "2026-02": {"total_consultores": 3199104.83, "total_supervisor": 1300000.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 3, "qtd_meta_batida": 2, "qtd_total_roster": 7, "consultores": [{"login": "vinicius.mendonca", "nome": "Vinicius Mendonç", "valor": 1850000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-07"}, {"login": "Marcus.philipe", "nome": "Marcus Philipe", "valor": 920000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "Caroline.ponchio", "nome": "Caroline Ponchio", "valor": 429104.83, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "Iris.chaves", "nome": "Íris Chaves", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-11"}, {"login": "ederson.carlos", "nome": "Ederson Campos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "leandro.camargo", "nome": "Leandro Camargo", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "renata.vales", "nome": "Renata Vales", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "Elza.Lopo", "nome": "ELZA LOPO", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "luciene.vidal", "nome": "Luciene E Rafael", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "nathali.diniz", "nome": "Nathalia M Diniz", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-03": {"total_consultores": 7517740.0, "total_supervisor": 6086711.4, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 6, "qtd_meta_batida": 4, "qtd_total_roster": 8, "consultores": [{"login": "vinicius.mendonca", "nome": "Vinicius Mendonç", "valor": 3442250.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-07"}, {"login": "Caroline.ponchio", "nome": "Caroline Ponchio", "valor": 1650000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "Marcus.philipe", "nome": "Marcus Philipe", "valor": 1104256.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "leandro.camargo", "nome": "Leandro Camargo", "valor": 525000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "luciene.vidal", "nome": "Luciene E Rafael", "valor": 400000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "renata.vales", "nome": "Renata Vales", "valor": 396234.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "Iris.chaves", "nome": "Íris Chaves", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-11"}, {"login": "ederson.carlos", "nome": "Ederson Campos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "Elza.Lopo", "nome": "ELZA LOPO", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "nathali.diniz", "nome": "Nathalia M Diniz", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-04": {"total_consultores": 10011602.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 8, "qtd_meta_batida": 5, "qtd_total_roster": 9, "consultores": [{"login": "Marcus.philipe", "nome": "Marcus Philipe", "valor": 5172182.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "luciene.vidal", "nome": "Luciene E Rafael", "valor": 1479420.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "Caroline.ponchio", "nome": "Caroline Ponchio", "valor": 1150000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "leandro.camargo", "nome": "Leandro Camargo", "valor": 1110000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "renata.vales", "nome": "Renata Vales", "valor": 520000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "ederson.carlos", "nome": "Ederson Campos", "valor": 280000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "vinicius.mendonca", "nome": "Vinicius Mendonç", "valor": 200000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-07"}, {"login": "Iris.chaves", "nome": "Íris Chaves", "valor": 100000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-11"}, {"login": "nathali.diniz", "nome": "Nathalia M Diniz", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Elza.Lopo", "nome": "ELZA LOPO", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}]}, "2026-05": {"total_consultores": 5529262.0, "total_supervisor": 360000.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 5, "qtd_meta_batida": 3, "qtd_total_roster": 10, "consultores": [{"login": "Marcus.philipe", "nome": "Marcus Philipe", "valor": 1751322.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "vinicius.mendonca", "nome": "Vinicius Mendonç", "valor": 1664880.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-07"}, {"login": "luciene.vidal", "nome": "Luciene E Rafael", "valor": 1305060.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "leandro.camargo", "nome": "Leandro Camargo", "valor": 488000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "ederson.carlos", "nome": "Ederson Campos", "valor": 320000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "Caroline.ponchio", "nome": "Caroline Ponchio", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "Elza.Lopo", "nome": "ELZA LOPO", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "Iris.chaves", "nome": "Íris Chaves", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-11"}, {"login": "nathali.diniz", "nome": "Nathalia M Diniz", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "renata.vales", "nome": "Renata Vales", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}]}, "2026-06": {"total_consultores": 7936660.0, "total_supervisor": 81000.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 8, "qtd_meta_batida": 6, "qtd_total_roster": 10, "consultores": [{"login": "Marcus.philipe", "nome": "Marcus Philipe", "valor": 2951660.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "luciene.vidal", "nome": "Luciene E Rafael", "valor": 1460000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "Caroline.ponchio", "nome": "Caroline Ponchio", "valor": 1005000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "vinicius.mendonca", "nome": "Vinicius Mendonç", "valor": 940000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-07"}, {"login": "renata.vales", "nome": "Renata Vales", "valor": 680000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "Elza.Lopo", "nome": "ELZA LOPO", "valor": 600000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "leandro.camargo", "nome": "Leandro Camargo", "valor": 200000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "nathali.diniz", "nome": "Nathalia M Diniz", "valor": 100000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Iris.chaves", "nome": "Íris Chaves", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-11"}, {"login": "ederson.carlos", "nome": "Ederson Campos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}]}, "2026-07": {"total_consultores": 12264265.0, "total_supervisor": 1375000.0, "supervisor_meta_batida": true, "supervisor_flag_na": false, "supervisor_flag": "verde", "supervisor_streak_sem_meta": 0, "qtd_ativos": 8, "qtd_meta_batida": 7, "qtd_total_roster": 10, "consultores": [{"login": "Caroline.ponchio", "nome": "Caroline Ponchio", "valor": 3330000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2025-09"}, {"login": "vinicius.mendonca", "nome": "Vinicius Mendonç", "valor": 2110000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2025-07"}, {"login": "Marcus.philipe", "nome": "Marcus Philipe", "valor": 1934265.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-01"}, {"login": "luciene.vidal", "nome": "Luciene E Rafael", "valor": 1425000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-03"}, {"login": "renata.vales", "nome": "Renata Vales", "valor": 1305000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-02"}, {"login": "nathali.diniz", "nome": "Nathalia M Diniz", "valor": 1260000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-04"}, {"login": "leandro.camargo", "nome": "Leandro Camargo", "valor": 800000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-02"}, {"login": "Elza.Lopo", "nome": "ELZA LOPO", "valor": 100000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-05"}, {"login": "Iris.chaves", "nome": "Íris Chaves", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2025-11"}, {"login": "ederson.carlos", "nome": "Ederson Campos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-02"}]}}}, "Belvedere - Daniel Camilo": {"nome": "Belvedere", "supervisor": "Daniel Camilo", "supervisor_login": null, "meses": {"2026-01": {"total_consultores": 920000.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 3, "qtd_meta_batida": 1, "qtd_total_roster": 7, "consultores": [{"login": "Igor.Vargas", "nome": "Igor Rosenburg Vargas", "valor": 500000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "fellipe.bastos", "nome": "Fellipe Bastos", "valor": 240000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2023-05"}, {"login": "henrique.mendes", "nome": "Henrique Mendes", "valor": 180000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-07"}, {"login": "Arthur.goulart", "nome": "Arthur Goulart", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "Pedro.falci", "nome": "Pedro Falci", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "Renan.aguiar", "nome": "Renan Aguiar", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "tati.dani", "nome": "TATI E DANI", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "andrei.lazzari", "nome": "Andrei Lazzari", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-02": {"total_consultores": 4569495.01, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 4, "qtd_meta_batida": 2, "qtd_total_roster": 7, "consultores": [{"login": "Arthur.goulart", "nome": "Arthur Goulart", "valor": 2601225.01, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "Igor.Vargas", "nome": "Igor Rosenburg Vargas", "valor": 1325000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "Renan.aguiar", "nome": "Renan Aguiar", "valor": 453270.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "tati.dani", "nome": "TATI E DANI", "valor": 190000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "Pedro.falci", "nome": "Pedro Falci", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "fellipe.bastos", "nome": "Fellipe Bastos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2023-05"}, {"login": "henrique.mendes", "nome": "Henrique Mendes", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-07"}, {"login": "andrei.lazzari", "nome": "Andrei Lazzari", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-03": {"total_consultores": 4786199.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 3, "qtd_meta_batida": 3, "qtd_total_roster": 7, "consultores": [{"login": "Renan.aguiar", "nome": "Renan Aguiar", "valor": 3384455.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "Igor.Vargas", "nome": "Igor Rosenburg Vargas", "valor": 901744.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "henrique.mendes", "nome": "Henrique Mendes", "valor": 500000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-07"}, {"login": "Arthur.goulart", "nome": "Arthur Goulart", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "Pedro.falci", "nome": "Pedro Falci", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "fellipe.bastos", "nome": "Fellipe Bastos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2023-05"}, {"login": "tati.dani", "nome": "TATI E DANI", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "andrei.lazzari", "nome": "Andrei Lazzari", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-04": {"total_consultores": 2810000.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 3, "qtd_meta_batida": 2, "qtd_total_roster": 8, "consultores": [{"login": "Pedro.falci", "nome": "Pedro Falci", "valor": 2150000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "Igor.Vargas", "nome": "Igor Rosenburg Vargas", "valor": 500000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "henrique.mendes", "nome": "Henrique Mendes", "valor": 160000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-07"}, {"login": "Arthur.goulart", "nome": "Arthur Goulart", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "Renan.aguiar", "nome": "Renan Aguiar", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "andrei.lazzari", "nome": "Andrei Lazzari", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "fellipe.bastos", "nome": "Fellipe Bastos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2023-05"}, {"login": "tati.dani", "nome": "TATI E DANI", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}]}, "2026-05": {"total_consultores": 5300000.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 4, "qtd_meta_batida": 4, "qtd_total_roster": 8, "consultores": [{"login": "andrei.lazzari", "nome": "Andrei Lazzari", "valor": 1575000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Pedro.falci", "nome": "Pedro Falci", "valor": 1400000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "Arthur.goulart", "nome": "Arthur Goulart", "valor": 1325000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "Igor.Vargas", "nome": "Igor Rosenburg Vargas", "valor": 1000000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "Renan.aguiar", "nome": "Renan Aguiar", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "fellipe.bastos", "nome": "Fellipe Bastos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2023-05"}, {"login": "henrique.mendes", "nome": "Henrique Mendes", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-07"}, {"login": "tati.dani", "nome": "TATI E DANI", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}]}, "2026-06": {"total_consultores": 8330000.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 4, "qtd_meta_batida": 2, "qtd_total_roster": 8, "consultores": [{"login": "Pedro.falci", "nome": "Pedro Falci", "valor": 7150000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "Arthur.goulart", "nome": "Arthur Goulart", "valor": 1000000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "henrique.mendes", "nome": "Henrique Mendes", "valor": 100000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-07"}, {"login": "tati.dani", "nome": "TATI E DANI", "valor": 80000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "Igor.Vargas", "nome": "Igor Rosenburg Vargas", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "Renan.aguiar", "nome": "Renan Aguiar", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-09"}, {"login": "andrei.lazzari", "nome": "Andrei Lazzari", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "fellipe.bastos", "nome": "Fellipe Bastos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2023-05"}]}, "2026-07": {"total_consultores": 2050000.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": false, "supervisor_flag": "azul", "supervisor_streak_sem_meta": 1, "qtd_ativos": 2, "qtd_meta_batida": 2, "qtd_total_roster": 8, "consultores": [{"login": "Pedro.falci", "nome": "Pedro Falci", "valor": 1050000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2025-09"}, {"login": "Arthur.goulart", "nome": "Arthur Goulart", "valor": 1000000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2025-09"}, {"login": "Igor.Vargas", "nome": "Igor Rosenburg Vargas", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2025-10"}, {"login": "Renan.aguiar", "nome": "Renan Aguiar", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2025-09"}, {"login": "andrei.lazzari", "nome": "Andrei Lazzari", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-04"}, {"login": "fellipe.bastos", "nome": "Fellipe Bastos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2023-05"}, {"login": "henrique.mendes", "nome": "Henrique Mendes", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2025-07"}, {"login": "tati.dani", "nome": "TATI E DANI", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2025-10"}]}}}, "Checkmat - Bernardo Bedinelli": {"nome": "Checkmat", "supervisor": "Bernardo Bedinelli", "supervisor_login": "bernardo.bedinelli", "meses": {"2026-01": {"total_consultores": 1006450.0, "total_supervisor": 3916190.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 1, "qtd_meta_batida": 1, "qtd_total_roster": 1, "consultores": [{"login": "ana.ottoni", "nome": "ANA OTTONI", "valor": 1006450.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "Filipe.Lacerda", "nome": "Filipe Lacerda", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "Guilherme.sotero", "nome": "Guilherme Sotero", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "Marina.Aleixo", "nome": "Marina Aleixo", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "artu.silva", "nome": "Artur Silva", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "daniel.pimentel", "nome": "Daniel Pimentel Romano Silveira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "fernando.marinho", "nome": "Fernando Marinho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "gustavo.guimaraes", "nome": "Gustavo Guimarães", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "gustavo.matta", "nome": "Gustavo Da Matta", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}]}, "2026-02": {"total_consultores": 1510000.0, "total_supervisor": 1000000.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 2, "qtd_meta_batida": 2, "qtd_total_roster": 2, "consultores": [{"login": "ana.ottoni", "nome": "ANA OTTONI", "valor": 1010000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "fernando.marinho", "nome": "Fernando Marinho", "valor": 500000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "Filipe.Lacerda", "nome": "Filipe Lacerda", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "Guilherme.sotero", "nome": "Guilherme Sotero", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "Marina.Aleixo", "nome": "Marina Aleixo", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "artu.silva", "nome": "Artur Silva", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "daniel.pimentel", "nome": "Daniel Pimentel Romano Silveira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "gustavo.guimaraes", "nome": "Gustavo Guimarães", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "gustavo.matta", "nome": "Gustavo Da Matta", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}]}, "2026-03": {"total_consultores": 1734655.29, "total_supervisor": 5823225.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 4, "qtd_meta_batida": 1, "qtd_total_roster": 4, "consultores": [{"login": "gustavo.matta", "nome": "Gustavo Da Matta", "valor": 525000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "ana.ottoni", "nome": "ANA OTTONI", "valor": 488366.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "fernando.marinho", "nome": "Fernando Marinho", "valor": 421289.29, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "artu.silva", "nome": "Artur Silva", "valor": 300000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "Filipe.Lacerda", "nome": "Filipe Lacerda", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "Guilherme.sotero", "nome": "Guilherme Sotero", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "Marina.Aleixo", "nome": "Marina Aleixo", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "daniel.pimentel", "nome": "Daniel Pimentel Romano Silveira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "gustavo.guimaraes", "nome": "Gustavo Guimarães", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}]}, "2026-04": {"total_consultores": 1590000.0, "total_supervisor": 1860924.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 4, "qtd_meta_batida": 1, "qtd_total_roster": 4, "consultores": [{"login": "gustavo.matta", "nome": "Gustavo Da Matta", "valor": 1110000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "fernando.marinho", "nome": "Fernando Marinho", "valor": 200000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "artu.silva", "nome": "Artur Silva", "valor": 180000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "ana.ottoni", "nome": "ANA OTTONI", "valor": 100000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "Filipe.Lacerda", "nome": "Filipe Lacerda", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "Guilherme.sotero", "nome": "Guilherme Sotero", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "Marina.Aleixo", "nome": "Marina Aleixo", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "daniel.pimentel", "nome": "Daniel Pimentel Romano Silveira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "gustavo.guimaraes", "nome": "Gustavo Guimarães", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}]}, "2026-05": {"total_consultores": 1865400.8, "total_supervisor": 1503000.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 3, "qtd_meta_batida": 2, "qtd_total_roster": 7, "consultores": [{"login": "gustavo.matta", "nome": "Gustavo Da Matta", "valor": 1180000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "ana.ottoni", "nome": "ANA OTTONI", "valor": 535400.8, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "Guilherme.sotero", "nome": "Guilherme Sotero", "valor": 150000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "Filipe.Lacerda", "nome": "Filipe Lacerda", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "Marina.Aleixo", "nome": "Marina Aleixo", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "artu.silva", "nome": "Artur Silva", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "fernando.marinho", "nome": "Fernando Marinho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "daniel.pimentel", "nome": "Daniel Pimentel Romano Silveira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "gustavo.guimaraes", "nome": "Gustavo Guimarães", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}]}, "2026-06": {"total_consultores": 2404000.0, "total_supervisor": 1627725.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 5, "qtd_meta_batida": 2, "qtd_total_roster": 8, "consultores": [{"login": "Marina.Aleixo", "nome": "Marina Aleixo", "valor": 900000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "Filipe.Lacerda", "nome": "Filipe Lacerda", "valor": 820000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "gustavo.guimaraes", "nome": "Gustavo Guimarães", "valor": 300000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "fernando.marinho", "nome": "Fernando Marinho", "valor": 280000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "gustavo.matta", "nome": "Gustavo Da Matta", "valor": 104000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "Guilherme.sotero", "nome": "Guilherme Sotero", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "ana.ottoni", "nome": "ANA OTTONI", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-10"}, {"login": "artu.silva", "nome": "Artur Silva", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "daniel.pimentel", "nome": "Daniel Pimentel Romano Silveira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}]}, "2026-07": {"total_consultores": 2211000.0, "total_supervisor": 728070.0, "supervisor_meta_batida": false, "supervisor_flag_na": false, "supervisor_flag": "azul", "supervisor_streak_sem_meta": 1, "qtd_ativos": 3, "qtd_meta_batida": 2, "qtd_total_roster": 9, "consultores": [{"login": "Marina.Aleixo", "nome": "Marina Aleixo", "valor": 1630000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-05"}, {"login": "gustavo.matta", "nome": "Gustavo Da Matta", "valor": 525000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-03"}, {"login": "daniel.pimentel", "nome": "Daniel Pimentel Romano Silveira", "valor": 56000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-07"}, {"login": "Filipe.Lacerda", "nome": "Filipe Lacerda", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-05"}, {"login": "Guilherme.sotero", "nome": "Guilherme Sotero", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-05"}, {"login": "ana.ottoni", "nome": "ANA OTTONI", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2025-10"}, {"login": "artu.silva", "nome": "Artur Silva", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-03"}, {"login": "fernando.marinho", "nome": "Fernando Marinho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-02"}, {"login": "gustavo.guimaraes", "nome": "Gustavo Guimarães", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-06"}]}}}, "Denucci & Partners - Augusthus Denucci": {"nome": "Denucci & Partners", "supervisor": "Augusthus Denucci", "supervisor_login": "augusthus.denucci", "meses": {"2026-01": {"total_consultores": 9245160.0, "total_supervisor": 3371735.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 1, "qtd_meta_batida": 1, "qtd_total_roster": 1, "consultores": [{"login": "victor.ribeiro", "nome": "Victor Zadorosny", "valor": 9245160.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "flavia.moreira", "nome": "Flávia Moreira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "matheus.athayde", "nome": "MATHEUS ATHAYDE", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}]}, "2026-02": {"total_consultores": 1323548.0, "total_supervisor": 630000.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 1, "qtd_meta_batida": 1, "qtd_total_roster": 1, "consultores": [{"login": "victor.ribeiro", "nome": "Victor Zadorosny", "valor": 1323548.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "flavia.moreira", "nome": "Flávia Moreira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "matheus.athayde", "nome": "MATHEUS ATHAYDE", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}]}, "2026-03": {"total_consultores": 4425764.57, "total_supervisor": 1172092.5, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 1, "qtd_meta_batida": 1, "qtd_total_roster": 1, "consultores": [{"login": "victor.ribeiro", "nome": "Victor Zadorosny", "valor": 4425764.57, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "flavia.moreira", "nome": "Flávia Moreira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "matheus.athayde", "nome": "MATHEUS ATHAYDE", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}]}, "2026-04": {"total_consultores": 0.0, "total_supervisor": 7081800.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 0, "qtd_meta_batida": 0, "qtd_total_roster": 1, "consultores": [{"login": "victor.ribeiro", "nome": "Victor Zadorosny", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "flavia.moreira", "nome": "Flávia Moreira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "matheus.athayde", "nome": "MATHEUS ATHAYDE", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}]}, "2026-05": {"total_consultores": 2250000.0, "total_supervisor": 3020000.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 2, "qtd_meta_batida": 1, "qtd_total_roster": 3, "consultores": [{"login": "victor.ribeiro", "nome": "Victor Zadorosny", "valor": 2050000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "flavia.moreira", "nome": "Flávia Moreira", "valor": 200000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "matheus.athayde", "nome": "MATHEUS ATHAYDE", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}]}, "2026-06": {"total_consultores": 100000.0, "total_supervisor": 3730000.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 1, "qtd_meta_batida": 0, "qtd_total_roster": 3, "consultores": [{"login": "matheus.athayde", "nome": "MATHEUS ATHAYDE", "valor": 100000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "flavia.moreira", "nome": "Flávia Moreira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "victor.ribeiro", "nome": "Victor Zadorosny", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}]}, "2026-07": {"total_consultores": 6141809.0, "total_supervisor": 2000000.0, "supervisor_meta_batida": true, "supervisor_flag_na": false, "supervisor_flag": "verde", "supervisor_streak_sem_meta": 0, "qtd_ativos": 3, "qtd_meta_batida": 2, "qtd_total_roster": 3, "consultores": [{"login": "flavia.moreira", "nome": "Flávia Moreira", "valor": 5500185.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-05"}, {"login": "victor.ribeiro", "nome": "Victor Zadorosny", "valor": 500000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-01"}, {"login": "matheus.athayde", "nome": "MATHEUS ATHAYDE", "valor": 141624.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-05"}]}}}, "Everest - Daniel Rabelo": {"nome": "Everest", "supervisor": "Daniel Rabelo", "supervisor_login": "daniel.rabelo", "meses": {"2026-01": {"total_consultores": 0.0, "total_supervisor": 1381915.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 0, "qtd_meta_batida": 0, "qtd_total_roster": 1, "consultores": [{"login": "eduardo.rabelo", "nome": "Eduardo Rabelo", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "alexandre.ranieri", "nome": "Alexandre Ranieri", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "fabia.coimbra", "nome": "Fabia Coimbra", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "joyce.baeca", "nome": "Joyce Baeça", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "patricia.espinosa", "nome": "Patrícia Espinosa", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "vinicius.oliveira", "nome": "Vinicius Cesar Mendes De Oliveira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-02": {"total_consultores": 0.0, "total_supervisor": 5563765.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 0, "qtd_meta_batida": 0, "qtd_total_roster": 2, "consultores": [{"login": "eduardo.rabelo", "nome": "Eduardo Rabelo", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "patricia.espinosa", "nome": "Patrícia Espinosa", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "alexandre.ranieri", "nome": "Alexandre Ranieri", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "fabia.coimbra", "nome": "Fabia Coimbra", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "joyce.baeca", "nome": "Joyce Baeça", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "vinicius.oliveira", "nome": "Vinicius Cesar Mendes De Oliveira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-03": {"total_consultores": 82784.0, "total_supervisor": 1000080.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 1, "qtd_meta_batida": 0, "qtd_total_roster": 2, "consultores": [{"login": "eduardo.rabelo", "nome": "Eduardo Rabelo", "valor": 82784.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "patricia.espinosa", "nome": "Patrícia Espinosa", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "alexandre.ranieri", "nome": "Alexandre Ranieri", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "fabia.coimbra", "nome": "Fabia Coimbra", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "joyce.baeca", "nome": "Joyce Baeça", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "vinicius.oliveira", "nome": "Vinicius Cesar Mendes De Oliveira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-04": {"total_consultores": 300000.0, "total_supervisor": 3785310.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 1, "qtd_meta_batida": 0, "qtd_total_roster": 6, "consultores": [{"login": "patricia.espinosa", "nome": "Patrícia Espinosa", "valor": 300000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "alexandre.ranieri", "nome": "Alexandre Ranieri", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "eduardo.rabelo", "nome": "Eduardo Rabelo", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "fabia.coimbra", "nome": "Fabia Coimbra", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "joyce.baeca", "nome": "Joyce Baeça", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "vinicius.oliveira", "nome": "Vinicius Cesar Mendes De Oliveira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-05": {"total_consultores": 561705.0, "total_supervisor": 3315620.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 3, "qtd_meta_batida": 0, "qtd_total_roster": 6, "consultores": [{"login": "alexandre.ranieri", "nome": "Alexandre Ranieri", "valor": 411520.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "patricia.espinosa", "nome": "Patrícia Espinosa", "valor": 100000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "fabia.coimbra", "nome": "Fabia Coimbra", "valor": 50185.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "eduardo.rabelo", "nome": "Eduardo Rabelo", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "joyce.baeca", "nome": "Joyce Baeça", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "vinicius.oliveira", "nome": "Vinicius Cesar Mendes De Oliveira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-06": {"total_consultores": 2801942.5, "total_supervisor": 665425.5, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 5, "qtd_meta_batida": 3, "qtd_total_roster": 6, "consultores": [{"login": "vinicius.oliveira", "nome": "Vinicius Cesar Mendes De Oliveira", "valor": 1076942.5, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "alexandre.ranieri", "nome": "Alexandre Ranieri", "valor": 750000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "fabia.coimbra", "nome": "Fabia Coimbra", "valor": 500000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "patricia.espinosa", "nome": "Patrícia Espinosa", "valor": 270000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-02"}, {"login": "joyce.baeca", "nome": "Joyce Baeça", "valor": 205000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "eduardo.rabelo", "nome": "Eduardo Rabelo", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}]}, "2026-07": {"total_consultores": 3334000.0, "total_supervisor": 1152000.0, "supervisor_meta_batida": true, "supervisor_flag_na": false, "supervisor_flag": "verde", "supervisor_streak_sem_meta": 0, "qtd_ativos": 4, "qtd_meta_batida": 3, "qtd_total_roster": 6, "consultores": [{"login": "joyce.baeca", "nome": "Joyce Baeça", "valor": 1350000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-04"}, {"login": "vinicius.oliveira", "nome": "Vinicius Cesar Mendes De Oliveira", "valor": 1302000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-04"}, {"login": "fabia.coimbra", "nome": "Fabia Coimbra", "valor": 630000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-04"}, {"login": "patricia.espinosa", "nome": "Patrícia Espinosa", "valor": 52000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-02"}, {"login": "alexandre.ranieri", "nome": "Alexandre Ranieri", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-04"}, {"login": "eduardo.rabelo", "nome": "Eduardo Rabelo", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-01"}]}}}, "Optimum - Renato Costa": {"nome": "Optimum", "supervisor": "Renato Costa", "supervisor_login": "renato.costa", "meses": {"2026-01": {"total_consultores": 0.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 0, "qtd_meta_batida": 0, "qtd_total_roster": 0, "consultores": [{"login": "bianca.bitencourt", "nome": "Bianca Bitencourt", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "breno.santos", "nome": "Breno De Moura Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "edson.vander", "nome": "Edson Vander", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "eneias.morais", "nome": "Eneias Morais", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "everton.lopes", "nome": "Everton Lopes", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "priscila.costa", "nome": "Priscila Costa", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "thiago.malta", "nome": "Thiago Malta", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "viviane.ferreira", "nome": "Viviane Marques", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}]}, "2026-02": {"total_consultores": 0.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 0, "qtd_meta_batida": 0, "qtd_total_roster": 0, "consultores": [{"login": "bianca.bitencourt", "nome": "Bianca Bitencourt", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "breno.santos", "nome": "Breno De Moura Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "edson.vander", "nome": "Edson Vander", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "eneias.morais", "nome": "Eneias Morais", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "everton.lopes", "nome": "Everton Lopes", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "priscila.costa", "nome": "Priscila Costa", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "thiago.malta", "nome": "Thiago Malta", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "viviane.ferreira", "nome": "Viviane Marques", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}]}, "2026-03": {"total_consultores": 2213000.0, "total_supervisor": 2287770.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 3, "qtd_meta_batida": 1, "qtd_total_roster": 4, "consultores": [{"login": "bianca.bitencourt", "nome": "Bianca Bitencourt", "valor": 2033000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "thiago.malta", "nome": "Thiago Malta", "valor": 100000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "everton.lopes", "nome": "Everton Lopes", "valor": 80000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "viviane.ferreira", "nome": "Viviane Marques", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "breno.santos", "nome": "Breno De Moura Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "edson.vander", "nome": "Edson Vander", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "eneias.morais", "nome": "Eneias Morais", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "priscila.costa", "nome": "Priscila Costa", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}]}, "2026-04": {"total_consultores": 3551250.0, "total_supervisor": 805000.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 4, "qtd_meta_batida": 3, "qtd_total_roster": 4, "consultores": [{"login": "bianca.bitencourt", "nome": "Bianca Bitencourt", "valor": 1651250.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "viviane.ferreira", "nome": "Viviane Marques", "valor": 1050000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "thiago.malta", "nome": "Thiago Malta", "valor": 570000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "everton.lopes", "nome": "Everton Lopes", "valor": 280000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "breno.santos", "nome": "Breno De Moura Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "edson.vander", "nome": "Edson Vander", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "eneias.morais", "nome": "Eneias Morais", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "priscila.costa", "nome": "Priscila Costa", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}]}, "2026-05": {"total_consultores": 1894000.0, "total_supervisor": 1820000.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 4, "qtd_meta_batida": 2, "qtd_total_roster": 5, "consultores": [{"login": "thiago.malta", "nome": "Thiago Malta", "valor": 684000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "everton.lopes", "nome": "Everton Lopes", "valor": 640000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "viviane.ferreira", "nome": "Viviane Marques", "valor": 420000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "bianca.bitencourt", "nome": "Bianca Bitencourt", "valor": 150000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "priscila.costa", "nome": "Priscila Costa", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "breno.santos", "nome": "Breno De Moura Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "edson.vander", "nome": "Edson Vander", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "eneias.morais", "nome": "Eneias Morais", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}]}, "2026-06": {"total_consultores": 4915515.29, "total_supervisor": 640000.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 4, "qtd_meta_batida": 3, "qtd_total_roster": 7, "consultores": [{"login": "everton.lopes", "nome": "Everton Lopes", "valor": 2955000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "edson.vander", "nome": "Edson Vander", "valor": 1075000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "thiago.malta", "nome": "Thiago Malta", "valor": 725515.29, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "priscila.costa", "nome": "Priscila Costa", "valor": 160000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-05"}, {"login": "bianca.bitencourt", "nome": "Bianca Bitencourt", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "eneias.morais", "nome": "Eneias Morais", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "viviane.ferreira", "nome": "Viviane Marques", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "breno.santos", "nome": "Breno De Moura Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}]}, "2026-07": {"total_consultores": 3585000.0, "total_supervisor": 2115000.0, "supervisor_meta_batida": true, "supervisor_flag_na": false, "supervisor_flag": "verde", "supervisor_streak_sem_meta": 0, "qtd_ativos": 8, "qtd_meta_batida": 3, "qtd_total_roster": 8, "consultores": [{"login": "edson.vander", "nome": "Edson Vander", "valor": 1000000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-06"}, {"login": "viviane.ferreira", "nome": "Viviane Marques", "valor": 795000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-03"}, {"login": "everton.lopes", "nome": "Everton Lopes", "valor": 655000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-03"}, {"login": "thiago.malta", "nome": "Thiago Malta", "valor": 395000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-03"}, {"login": "priscila.costa", "nome": "Priscila Costa", "valor": 360000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-05"}, {"login": "eneias.morais", "nome": "Eneias Morais", "valor": 180000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-06"}, {"login": "breno.santos", "nome": "Breno De Moura Santos", "valor": 120000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-07"}, {"login": "bianca.bitencourt", "nome": "Bianca Bitencourt", "valor": 80000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-03"}]}}}, "SNIPERS - HUMBERTO FERREIRA": {"nome": "SNIPERS", "supervisor": "HUMBERTO FERREIRA", "supervisor_login": null, "meses": {"2026-01": {"total_consultores": 0.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 0, "qtd_meta_batida": 0, "qtd_total_roster": 0, "consultores": [{"login": "HumbertoCarvalho", "nome": "Humberto De Carvalho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-02": {"total_consultores": 0.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 0, "qtd_meta_batida": 0, "qtd_total_roster": 0, "consultores": [{"login": "HumbertoCarvalho", "nome": "Humberto De Carvalho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-03": {"total_consultores": 0.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 0, "qtd_meta_batida": 0, "qtd_total_roster": 0, "consultores": [{"login": "HumbertoCarvalho", "nome": "Humberto De Carvalho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-04": {"total_consultores": 0.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 0, "qtd_meta_batida": 0, "qtd_total_roster": 1, "consultores": [{"login": "HumbertoCarvalho", "nome": "Humberto De Carvalho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-05": {"total_consultores": 3630000.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 1, "qtd_meta_batida": 1, "qtd_total_roster": 1, "consultores": [{"login": "HumbertoCarvalho", "nome": "Humberto De Carvalho", "valor": 3630000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-06": {"total_consultores": 2991178.67, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 1, "qtd_meta_batida": 1, "qtd_total_roster": 1, "consultores": [{"login": "HumbertoCarvalho", "nome": "Humberto De Carvalho", "valor": 2991178.67, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-07": {"total_consultores": 854000.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": false, "supervisor_flag": "azul", "supervisor_streak_sem_meta": 1, "qtd_ativos": 1, "qtd_meta_batida": 1, "qtd_total_roster": 1, "consultores": [{"login": "HumbertoCarvalho", "nome": "Humberto De Carvalho", "valor": 854000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-04"}]}}}, "Triumpho - Gabriel Ferraz": {"nome": "Triumpho", "supervisor": "Gabriel Ferraz", "supervisor_login": "Gabriel.ferraz", "meses": {"2026-01": {"total_consultores": 2376957.5, "total_supervisor": 3897155.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 2, "qtd_meta_batida": 2, "qtd_total_roster": 3, "consultores": [{"login": "dabbya.eliezer", "nome": "Dabbya", "valor": 1233100.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "filipe.guedes", "nome": "Felipe Guedes", "valor": 1143857.5, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-11"}, {"login": "alessandra.franco", "nome": "Alessandra Franco Resende", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2023-06"}, {"login": "Danielfelicio", "nome": "Daniel Andrade Felicio", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Gustavo.peixoto", "nome": "GUSTAVO PEIXOTO", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "JoaoCardoso", "nome": "João Frederico Cardoso Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Matheus.rolla", "nome": "Matheus Rolla", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "RicardoZvaigzne", "nome": "Ricardo Batista Zvaigzne", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "anaclaudia.carvalho", "nome": "Ana Claudia Rodrigues Carvalho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "paulo.marcio", "nome": "Paulo Marcio", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "paulo.sergio", "nome": "Paulo Sérgio", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}]}, "2026-02": {"total_consultores": 1176740.0, "total_supervisor": 1547537.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 3, "qtd_meta_batida": 1, "qtd_total_roster": 3, "consultores": [{"login": "dabbya.eliezer", "nome": "Dabbya", "valor": 701740.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "alessandra.franco", "nome": "Alessandra Franco Resende", "valor": 350000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2023-06"}, {"login": "filipe.guedes", "nome": "Felipe Guedes", "valor": 125000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-11"}, {"login": "Danielfelicio", "nome": "Daniel Andrade Felicio", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Gustavo.peixoto", "nome": "GUSTAVO PEIXOTO", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "JoaoCardoso", "nome": "João Frederico Cardoso Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Matheus.rolla", "nome": "Matheus Rolla", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "RicardoZvaigzne", "nome": "Ricardo Batista Zvaigzne", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "anaclaudia.carvalho", "nome": "Ana Claudia Rodrigues Carvalho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "paulo.marcio", "nome": "Paulo Marcio", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "paulo.sergio", "nome": "Paulo Sérgio", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}]}, "2026-03": {"total_consultores": 3401332.5, "total_supervisor": 1374950.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 3, "qtd_meta_batida": 1, "qtd_total_roster": 5, "consultores": [{"login": "dabbya.eliezer", "nome": "Dabbya", "valor": 2722852.5, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "paulo.sergio", "nome": "Paulo Sérgio", "valor": 375000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "alessandra.franco", "nome": "Alessandra Franco Resende", "valor": 303480.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2023-06"}, {"login": "filipe.guedes", "nome": "Felipe Guedes", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-11"}, {"login": "paulo.marcio", "nome": "Paulo Marcio", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "Danielfelicio", "nome": "Daniel Andrade Felicio", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Gustavo.peixoto", "nome": "GUSTAVO PEIXOTO", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "JoaoCardoso", "nome": "João Frederico Cardoso Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Matheus.rolla", "nome": "Matheus Rolla", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "RicardoZvaigzne", "nome": "Ricardo Batista Zvaigzne", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "anaclaudia.carvalho", "nome": "Ana Claudia Rodrigues Carvalho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}]}, "2026-04": {"total_consultores": 5161650.57, "total_supervisor": 1225000.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 7, "qtd_meta_batida": 4, "qtd_total_roster": 10, "consultores": [{"login": "dabbya.eliezer", "nome": "Dabbya", "valor": 1541590.57, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "Gustavo.peixoto", "nome": "GUSTAVO PEIXOTO", "valor": 1250000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "paulo.marcio", "nome": "Paulo Marcio", "valor": 1025000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "Matheus.rolla", "nome": "Matheus Rolla", "valor": 652180.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "alessandra.franco", "nome": "Alessandra Franco Resende", "valor": 350000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2023-06"}, {"login": "paulo.sergio", "nome": "Paulo Sérgio", "valor": 240000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "filipe.guedes", "nome": "Felipe Guedes", "valor": 102880.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-11"}, {"login": "Danielfelicio", "nome": "Daniel Andrade Felicio", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "JoaoCardoso", "nome": "João Frederico Cardoso Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "RicardoZvaigzne", "nome": "Ricardo Batista Zvaigzne", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "anaclaudia.carvalho", "nome": "Ana Claudia Rodrigues Carvalho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}]}, "2026-05": {"total_consultores": 9553890.0, "total_supervisor": 1375000.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 8, "qtd_meta_batida": 5, "qtd_total_roster": 10, "consultores": [{"login": "Danielfelicio", "nome": "Daniel Andrade Felicio", "valor": 2250000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "dabbya.eliezer", "nome": "Dabbya", "valor": 2212460.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "JoaoCardoso", "nome": "João Frederico Cardoso Santos", "valor": 1910000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "paulo.marcio", "nome": "Paulo Marcio", "valor": 1500000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "Gustavo.peixoto", "nome": "GUSTAVO PEIXOTO", "valor": 501250.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Matheus.rolla", "nome": "Matheus Rolla", "valor": 430180.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "RicardoZvaigzne", "nome": "Ricardo Batista Zvaigzne", "valor": 400000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "alessandra.franco", "nome": "Alessandra Franco Resende", "valor": 350000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2023-06"}, {"login": "filipe.guedes", "nome": "Felipe Guedes", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-11"}, {"login": "paulo.sergio", "nome": "Paulo Sérgio", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "anaclaudia.carvalho", "nome": "Ana Claudia Rodrigues Carvalho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}]}, "2026-06": {"total_consultores": 5252210.0, "total_supervisor": 500000.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 7, "qtd_meta_batida": 4, "qtd_total_roster": 11, "consultores": [{"login": "RicardoZvaigzne", "nome": "Ricardo Batista Zvaigzne", "valor": 1108720.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Matheus.rolla", "nome": "Matheus Rolla", "valor": 1006310.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "filipe.guedes", "nome": "Felipe Guedes", "valor": 1000000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2025-11"}, {"login": "paulo.marcio", "nome": "Paulo Marcio", "valor": 1000000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "dabbya.eliezer", "nome": "Dabbya", "valor": 475000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "JoaoCardoso", "nome": "João Frederico Cardoso Santos", "valor": 352180.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "anaclaudia.carvalho", "nome": "Ana Claudia Rodrigues Carvalho", "valor": 310000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "Danielfelicio", "nome": "Daniel Andrade Felicio", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Gustavo.peixoto", "nome": "GUSTAVO PEIXOTO", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "alessandra.franco", "nome": "Alessandra Franco Resende", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2023-06"}, {"login": "paulo.sergio", "nome": "Paulo Sérgio", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}]}, "2026-07": {"total_consultores": 13737790.0, "total_supervisor": 0.0, "supervisor_meta_batida": false, "supervisor_flag_na": false, "supervisor_flag": "azul", "supervisor_streak_sem_meta": 1, "qtd_ativos": 9, "qtd_meta_batida": 8, "qtd_total_roster": 11, "consultores": [{"login": "paulo.marcio", "nome": "Paulo Marcio", "valor": 3375000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-03"}, {"login": "Danielfelicio", "nome": "Daniel Andrade Felicio", "valor": 2075000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-04"}, {"login": "anaclaudia.carvalho", "nome": "Ana Claudia Rodrigues Carvalho", "valor": 1950000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-06"}, {"login": "alessandra.franco", "nome": "Alessandra Franco Resende", "valor": 1500000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2023-06"}, {"login": "Matheus.rolla", "nome": "Matheus Rolla", "valor": 1375000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-04"}, {"login": "RicardoZvaigzne", "nome": "Ricardo Batista Zvaigzne", "valor": 1307790.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-04"}, {"login": "dabbya.eliezer", "nome": "Dabbya", "valor": 1130000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-01"}, {"login": "JoaoCardoso", "nome": "João Frederico Cardoso Santos", "valor": 900000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-04"}, {"login": "Gustavo.peixoto", "nome": "GUSTAVO PEIXOTO", "valor": 125000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-04"}, {"login": "filipe.guedes", "nome": "Felipe Guedes", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2025-11"}, {"login": "paulo.sergio", "nome": "Paulo Sérgio", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-03"}]}}}, "Winner - Rafael Catizani": {"nome": "Winner", "supervisor": "Rafael Catizani", "supervisor_login": "rafael.catizani", "meses": {"2026-01": {"total_consultores": 1360000.0, "total_supervisor": 1040000.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 1, "qtd_meta_batida": 1, "qtd_total_roster": 2, "consultores": [{"login": "claudia.diniz", "nome": "Claudia Diniz", "valor": 1360000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "flavia.stoppa", "nome": "Flávia Stoppa", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "Alex.sovat", "nome": "Alex Sovat", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Ana.cristina", "nome": "Ana Cristina", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": null}, {"login": "Elisabeth", "nome": "Elisabeth", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "Fernanda.penna", "nome": "Fernanda Penna", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "Glaucia.souza", "nome": "Glaucia Souza", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Luiza.carvalho", "nome": "Luiza Carvalho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "Natliasimoes", "nome": "Natalia Braga Simoes", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Rodrigo.barbosa", "nome": "Rodrigo Andrade", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Thiago.santos", "nome": "Thiago Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "leandro.ferreira", "nome": "Leandro Ferreira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "matheus.martins", "nome": "Matheus Martins", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}]}, "2026-02": {"total_consultores": 1750000.0, "total_supervisor": 2400000.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 2, "qtd_meta_batida": 2, "qtd_total_roster": 2, "consultores": [{"login": "claudia.diniz", "nome": "Claudia Diniz", "valor": 1205000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "flavia.stoppa", "nome": "Flávia Stoppa", "valor": 545000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "Alex.sovat", "nome": "Alex Sovat", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Ana.cristina", "nome": "Ana Cristina", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": null}, {"login": "Elisabeth", "nome": "Elisabeth", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "Fernanda.penna", "nome": "Fernanda Penna", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "Glaucia.souza", "nome": "Glaucia Souza", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Luiza.carvalho", "nome": "Luiza Carvalho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "Natliasimoes", "nome": "Natalia Braga Simoes", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Rodrigo.barbosa", "nome": "Rodrigo Andrade", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Thiago.santos", "nome": "Thiago Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "leandro.ferreira", "nome": "Leandro Ferreira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "matheus.martins", "nome": "Matheus Martins", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}]}, "2026-03": {"total_consultores": 2091994.0, "total_supervisor": 2189040.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 3, "qtd_meta_batida": 2, "qtd_total_roster": 3, "consultores": [{"login": "flavia.stoppa", "nome": "Flávia Stoppa", "valor": 1053994.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "claudia.diniz", "nome": "Claudia Diniz", "valor": 990000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "matheus.martins", "nome": "Matheus Martins", "valor": 48000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "Alex.sovat", "nome": "Alex Sovat", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Ana.cristina", "nome": "Ana Cristina", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": null}, {"login": "Elisabeth", "nome": "Elisabeth", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "Fernanda.penna", "nome": "Fernanda Penna", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "Glaucia.souza", "nome": "Glaucia Souza", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Luiza.carvalho", "nome": "Luiza Carvalho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "Natliasimoes", "nome": "Natalia Braga Simoes", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Rodrigo.barbosa", "nome": "Rodrigo Andrade", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Thiago.santos", "nome": "Thiago Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "leandro.ferreira", "nome": "Leandro Ferreira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}]}, "2026-04": {"total_consultores": 1175364.61, "total_supervisor": 3415000.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 3, "qtd_meta_batida": 1, "qtd_total_roster": 8, "consultores": [{"login": "claudia.diniz", "nome": "Claudia Diniz", "valor": 755000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "flavia.stoppa", "nome": "Flávia Stoppa", "valor": 245364.61, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "leandro.ferreira", "nome": "Leandro Ferreira", "valor": 175000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Alex.sovat", "nome": "Alex Sovat", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Glaucia.souza", "nome": "Glaucia Souza", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Natliasimoes", "nome": "Natalia Braga Simoes", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Rodrigo.barbosa", "nome": "Rodrigo Andrade", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "matheus.martins", "nome": "Matheus Martins", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "Ana.cristina", "nome": "Ana Cristina", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": null}, {"login": "Elisabeth", "nome": "Elisabeth", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "Fernanda.penna", "nome": "Fernanda Penna", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "Luiza.carvalho", "nome": "Luiza Carvalho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "Thiago.santos", "nome": "Thiago Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}]}, "2026-05": {"total_consultores": 3213250.0, "total_supervisor": 660000.0, "supervisor_meta_batida": false, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 5, "qtd_meta_batida": 2, "qtd_total_roster": 8, "consultores": [{"login": "claudia.diniz", "nome": "Claudia Diniz", "valor": 1330000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "Alex.sovat", "nome": "Alex Sovat", "valor": 1200000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "flavia.stoppa", "nome": "Flávia Stoppa", "valor": 403250.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "Rodrigo.barbosa", "nome": "Rodrigo Andrade", "valor": 180000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Glaucia.souza", "nome": "Glaucia Souza", "valor": 100000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Natliasimoes", "nome": "Natalia Braga Simoes", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "leandro.ferreira", "nome": "Leandro Ferreira", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "matheus.martins", "nome": "Matheus Martins", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "Ana.cristina", "nome": "Ana Cristina", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": null}, {"login": "Elisabeth", "nome": "Elisabeth", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "Fernanda.penna", "nome": "Fernanda Penna", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "Luiza.carvalho", "nome": "Luiza Carvalho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "Thiago.santos", "nome": "Thiago Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}]}, "2026-06": {"total_consultores": 5463137.41, "total_supervisor": 2374040.0, "supervisor_meta_batida": true, "supervisor_flag_na": true, "supervisor_flag": null, "supervisor_streak_sem_meta": null, "qtd_ativos": 7, "qtd_meta_batida": 3, "qtd_total_roster": 9, "consultores": [{"login": "claudia.diniz", "nome": "Claudia Diniz", "valor": 2020000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "Natliasimoes", "nome": "Natalia Braga Simoes", "valor": 1500000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "leandro.ferreira", "nome": "Leandro Ferreira", "valor": 1040000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Elisabeth", "nome": "Elisabeth", "valor": 423137.41, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-06"}, {"login": "Glaucia.souza", "nome": "Glaucia Souza", "valor": 200000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "Alex.sovat", "nome": "Alex Sovat", "valor": 180000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "flavia.stoppa", "nome": "Flávia Stoppa", "valor": 100000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-01"}, {"login": "Rodrigo.barbosa", "nome": "Rodrigo Andrade", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-04"}, {"login": "matheus.martins", "nome": "Matheus Martins", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-03"}, {"login": "Ana.cristina", "nome": "Ana Cristina", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": null}, {"login": "Fernanda.penna", "nome": "Fernanda Penna", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "Luiza.carvalho", "nome": "Luiza Carvalho", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}, {"login": "Thiago.santos", "nome": "Thiago Santos", "valor": 0.0, "ativo": false, "meta_batida": false, "na": true, "flag_na": true, "flag": null, "streak_sem_meta": null, "cadastro_mes": "2026-07"}]}, "2026-07": {"total_consultores": 9095000.0, "total_supervisor": 3608000.0, "supervisor_meta_batida": true, "supervisor_flag_na": false, "supervisor_flag": "verde", "supervisor_streak_sem_meta": 0, "qtd_ativos": 10, "qtd_meta_batida": 5, "qtd_total_roster": 13, "consultores": [{"login": "Fernanda.penna", "nome": "Fernanda Penna", "valor": 3640000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-07"}, {"login": "Thiago.santos", "nome": "Thiago Santos", "valor": 1640000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-07"}, {"login": "Glaucia.souza", "nome": "Glaucia Souza", "valor": 1100000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-04"}, {"login": "Alex.sovat", "nome": "Alex Sovat", "valor": 1080000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-04"}, {"login": "claudia.diniz", "nome": "Claudia Diniz", "valor": 845000.0, "ativo": true, "meta_batida": true, "na": false, "flag_na": false, "flag": "verde", "streak_sem_meta": 0, "cadastro_mes": "2026-01"}, {"login": "Elisabeth", "nome": "Elisabeth", "valor": 350000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-06"}, {"login": "Luiza.carvalho", "nome": "Luiza Carvalho", "valor": 180000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-07"}, {"login": "Ana.cristina", "nome": "Ana Cristina", "valor": 100000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": null}, {"login": "Natliasimoes", "nome": "Natalia Braga Simoes", "valor": 80000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-04"}, {"login": "leandro.ferreira", "nome": "Leandro Ferreira", "valor": 80000.0, "ativo": true, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-04"}, {"login": "Rodrigo.barbosa", "nome": "Rodrigo Andrade", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-04"}, {"login": "flavia.stoppa", "nome": "Flávia Stoppa", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-01"}, {"login": "matheus.martins", "nome": "Matheus Martins", "valor": 0.0, "ativo": false, "meta_batida": false, "na": false, "flag_na": false, "flag": "azul", "streak_sem_meta": 1, "cadastro_mes": "2026-03"}]}}}}};
+
+const monthNames = {
+  '01':'Jan','02':'Fev','03':'Mar','04':'Abr','05':'Mai','06':'Jun','07':'Jul',
+  '08':'Ago','09':'Set','10':'Out','11':'Nov','12':'Dez'
+};
+const monthNamesFull = {
+  '01':'Janeiro','02':'Fevereiro','03':'Março','04':'Abril','05':'Maio','06':'Junho','07':'Julho',
+  '08':'Agosto','09':'Setembro','10':'Outubro','11':'Novembro','12':'Dezembro'
+};
+
+function fmtMonth(m) { const [y, mm] = m.split('-'); return monthNamesFull[mm] + '/' + y.slice(2); }
+function fmtMonthShort(m) { const [y, mm] = m.split('-'); return monthNames[mm]; }
+function fmtCurrency(v) { return 'R$ ' + Math.round(v).toLocaleString('pt-BR'); }
+function fmtCurrencyShort(v) {
+  if (v >= 1000000) return 'R$ ' + (v/1000000).toFixed(1).replace('.0','') + 'M';
+  if (v >= 1000) return 'R$ ' + (v/1000).toFixed(0) + 'k';
+  return 'R$ ' + Math.round(v);
+}
+
+/* ---------------- Precompute monthly aggregates across all teams ---------------- */
+const teamKeys = Object.keys(DATA.teams);
+const monthlyAgg = {};
+DATA.months.forEach(mes => {
+  let totalVendido=0, totalAtivos=0, totalMetaBatida=0, totalRoster=0, supMetaBatida=0, supAtivos=0;
+  teamKeys.forEach(k => {
+    const md = DATA.teams[k].meses[mes];
+    totalVendido += md.total_consultores + md.total_supervisor;
+    totalAtivos += md.qtd_ativos;
+    totalMetaBatida += md.qtd_meta_batida;
+    totalRoster += md.qtd_total_roster;
+    if (md.supervisor_meta_batida) supMetaBatida++;
+    if (md.total_supervisor > 0) supAtivos++;
+  });
+  monthlyAgg[mes] = {
+    totalVendido, totalAtivos, totalMetaBatida, totalRoster,
+    supMetaBatida, supAtivos, teamsCount: teamKeys.length,
+    pctAtivosCons: totalRoster ? totalAtivos/totalRoster*100 : 0,
+    pctMetaCons: totalRoster ? totalMetaBatida/totalRoster*100 : 0,
+    pctAtivosSup: teamKeys.length ? supAtivos/teamKeys.length*100 : 0,
+    pctMetaSup: teamKeys.length ? supMetaBatida/teamKeys.length*100 : 0
+  };
+});
+
+/* ---------------- Tooltip (shared across all charts) ---------------- */
+function escAttr(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+}
+function showTooltip(html, x, y) {
+  const tip = document.getElementById('chartTooltip');
+  tip.innerHTML = html;
+  tip.style.opacity = '1';
+  const rect = tip.getBoundingClientRect();
+  let left = x + 16, top = y + 16;
+  if (left + rect.width > window.innerWidth - 12) left = x - rect.width - 16;
+  if (top + rect.height > window.innerHeight - 12) top = y - rect.height - 16;
+  tip.style.left = left + 'px';
+  tip.style.top = top + 'px';
+}
+function hideTooltip() {
+  document.getElementById('chartTooltip').style.opacity = '0';
+}
+document.addEventListener('mousemove', (e) => {
+  const pt = e.target.closest('.hit-point');
+  if (pt) showTooltip(pt.getAttribute('data-tip'), e.clientX, e.clientY);
+  else hideTooltip();
+});
+document.addEventListener('mouseleave', hideTooltip);
+
+/* ---------------- Sparkline builder ---------------- */
+function buildSparkline(values, labels, highlightIdx, color) {
+  const w = 220, h = 40, pad = 4;
+  const max = Math.max(...values, 1), min = Math.min(...values, 0);
+  const range = (max - min) || 1;
+  const step = (w - pad*2) / (values.length - 1 || 1);
+  const pts = values.map((v,i) => [pad + i*step, h - pad - ((v-min)/range)*(h-pad*2)]);
+  const path = smoothPath(pts);
+  const hx = pts[highlightIdx][0], hy = pts[highlightIdx][1];
+  const areaPath = `${path} L ${pts[pts.length-1][0]} ${h} L ${pts[0][0]} ${h} Z`;
+  const gid = 'sg' + Math.random().toString(36).slice(2,9);
+
+  let hitPoints = '';
+  pts.forEach((p,i) => {
+    hitPoints += `<circle class="hit-point" cx="${p[0]}" cy="${p[1]}" r="9" fill="transparent" data-tip="${escAttr(labels[i])}"/>`;
+  });
+  let visibleDots = '';
+  pts.forEach((p,i) => {
+    if (i === highlightIdx) return;
+    visibleDots += `<circle cx="${p[0]}" cy="${p[1]}" r="1.6" fill="${color}" opacity="0.55" pointer-events="none"/>`;
+  });
+
+  return `
+    <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="${color}" stop-opacity="0.35"/>
+          <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="${areaPath}" fill="url(#${gid})" stroke="none" pointer-events="none"/>
+      <path d="${path}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" pointer-events="none"/>
+      ${visibleDots}
+      <circle cx="${hx}" cy="${hy}" r="3.4" fill="${color}" stroke="#231F20" stroke-width="1.5" pointer-events="none"/>
+      ${hitPoints}
+    </svg>
+  `;
+}
+
+function smoothPath(pts) {
+  if (pts.length < 2) return '';
+  let d = `M ${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i === 0 ? 0 : i-1];
+    const p1 = pts[i];
+    const p2 = pts[i+1];
+    const p3 = pts[i+2 < pts.length ? i+2 : i+1];
+    const c1x = p1[0] + (p2[0]-p0[0])/6;
+    const c1y = p1[1] + (p2[1]-p0[1])/6;
+    const c2x = p2[0] - (p3[0]-p1[0])/6;
+    const c2y = p2[1] - (p3[1]-p1[1])/6;
+    d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${p2[0]} ${p2[1]}`;
+  }
+  return d;
+}
+
+/* ---------------- Gauge builder ---------------- */
+function buildGauge(pct, sub, tipTitle) {
+  const clamped = Math.max(0, Math.min(100, pct));
+  const cx = 100, cy = 95, r = 78;
+  const angle = -90 + (clamped/100)*180;
+  const rad = angle * Math.PI/180;
+  const tipX = cx + (r*0.74) * Math.sin(rad);
+  const tipY = cy - (r*0.74) * Math.cos(rad);
+
+  function arcPath(startDeg, endDeg) {
+    const s = startDeg*Math.PI/180, e = endDeg*Math.PI/180;
+    const x1 = cx + r*Math.sin(s), y1 = cy - r*Math.cos(s);
+    const x2 = cx + r*Math.sin(e), y2 = cy - r*Math.cos(e);
+    const large = (endDeg-startDeg) > 180 ? 1 : 0;
+    return `M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}`;
+  }
+
+  let needleColor = '#EE3124';
+  if (clamped >= 70) needleColor = '#34D399';
+  else if (clamped >= 40) needleColor = '#F5B942';
+
+  const tipHtml = `<div class="tip-title">${escAttr(tipTitle)}</div><div class="tip-value">${clamped.toFixed(1)}%</div><div class="tip-sub">${escAttr(sub)}</div>`;
+
+  return `
+    <svg class="gauge-svg" viewBox="0 0 200 115">
+      <path d="${arcPath(-90,-30)}" stroke="rgba(238,49,36,0.35)" stroke-width="14" fill="none" stroke-linecap="round" pointer-events="none"/>
+      <path d="${arcPath(-30,30)}" stroke="rgba(245,185,66,0.35)" stroke-width="14" fill="none" stroke-linecap="round" pointer-events="none"/>
+      <path d="${arcPath(30,90)}" stroke="rgba(52,211,153,0.35)" stroke-width="14" fill="none" stroke-linecap="round" pointer-events="none"/>
+      <line x1="${cx}" y1="${cy}" x2="${tipX}" y2="${tipY}" stroke="${needleColor}" stroke-width="3.5" stroke-linecap="round" pointer-events="none"/>
+      <circle cx="${cx}" cy="${cy}" r="6" fill="${needleColor}" pointer-events="none"/>
+      <circle cx="${cx}" cy="${cy}" r="10" fill="none" stroke="${needleColor}" stroke-opacity="0.3" stroke-width="2" pointer-events="none"/>
+      <path class="hit-point" d="${arcPath(-90,90)}" stroke="transparent" stroke-width="30" fill="none" data-tip="${escAttr(tipHtml)}"/>
+    </svg>
+    <div class="gauge-value" style="color:${needleColor}">${clamped.toFixed(0)}%</div>
+    <div class="gauge-sub">${sub}</div>
+  `;
+}
+
+/* ---------------- Area chart (total vendido por mês) ---------------- */
+function buildAreaChart(selectedMes) {
+  const w = 900, h = 220, padL = 8, padR = 8, padT = 14, padB = 8;
+  const values = DATA.months.map(m => monthlyAgg[m].totalVendido);
+  const max = Math.max(...values) * 1.12 || 1;
+  const step = (w - padL - padR) / (values.length - 1 || 1);
+  const pts = values.map((v,i) => [padL + i*step, padT + (h-padT-padB) * (1 - v/max)]);
+  const path = smoothPath(pts);
+  const areaPath = `${path} L ${pts[pts.length-1][0]} ${h-padB} L ${pts[0][0]} ${h-padB} Z`;
+  const selIdx = DATA.months.indexOf(selectedMes);
+  const selPt = pts[selIdx];
+
+  let dots = '', hitPoints = '';
+  pts.forEach((p,i) => {
+    const isSel = i === selIdx;
+    const m = DATA.months[i];
+    const a = monthlyAgg[m];
+    const tip = `<div class="tip-title">${fmtMonth(m)}</div>
+                 <div class="tip-value">${fmtCurrency(a.totalVendido)}</div>
+                 <div class="tip-sub">${a.totalAtivos}/${a.totalRoster} consultores ativos · ${a.totalMetaBatida} bateram a meta</div>`;
+    dots += `<circle cx="${p[0]}" cy="${p[1]}" r="${isSel ? 5 : 3}" fill="${isSel ? '#EE3124' : '#DCDDDE'}" stroke="#231F20" stroke-width="${isSel?2:1}" opacity="${isSel?1:0.7}" pointer-events="none"/>`;
+    hitPoints += `<circle class="hit-point" cx="${p[0]}" cy="${p[1]}" r="16" fill="transparent" data-tip="${escAttr(tip)}"/>`;
+  });
+
+  return `
+    <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#EE3124" stop-opacity="0.45"/>
+          <stop offset="100%" stop-color="#EE3124" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <line x1="${padL}" y1="${padT}" x2="${w-padR}" y2="${padT}" stroke="rgba(255,255,255,0.06)" stroke-width="1" pointer-events="none"/>
+      <line x1="${padL}" y1="${(padT+h-padB)/2}" x2="${w-padR}" y2="${(padT+h-padB)/2}" stroke="rgba(255,255,255,0.06)" stroke-width="1" pointer-events="none"/>
+      <path d="${areaPath}" fill="url(#areaGrad)" stroke="none" pointer-events="none"/>
+      <path d="${path}" fill="none" stroke="#EE3124" stroke-width="2.6" stroke-linecap="round" pointer-events="none"/>
+      ${selPt ? `<line x1="${selPt[0]}" y1="${padT}" x2="${selPt[0]}" y2="${h-padB}" stroke="#EE3124" stroke-width="1" stroke-dasharray="3,3" opacity="0.5" pointer-events="none"/>` : ''}
+      ${dots}
+      ${hitPoints}
+    </svg>
+  `;
+}
+
+/* ---------------- Bar chart (novos cadastros por mês) ---------------- */
+function buildCadastrosChart(selectedMes) {
+  const w = 900, h = 180, padL = 8, padR = 8, padT = 14, padB = 20;
+  const cad = DATA.cadastros;
+  const values = cad.map(c => c.quantidade);
+  const max = Math.max(...values, 1) * 1.2;
+  const n = cad.length;
+  const slot = (w - padL - padR) / n;
+  const barW = Math.min(26, slot * 0.55);
+  const innerH = h - padT - padB;
+
+  let bars = '', hitAreas = '';
+  cad.forEach((c, i) => {
+    const x = padL + i*slot + (slot - barW)/2;
+    const barH = (c.quantidade / max) * innerH;
+    const y = padT + innerH - barH;
+    const isSel = c.mes === selectedMes;
+    const fill = isSel ? '#EE3124' : 'rgba(238,49,36,0.45)';
+    const tip = `<div class="tip-title">${fmtMonth(c.mes)}</div><div class="tip-value">${c.quantidade} ${c.quantidade === 1 ? 'novo cadastro' : 'novos cadastros'}</div><div class="tip-sub">consultores/supervisores incorporados à loja Belvedere</div>`;
+    bars += `<rect x="${x}" y="${y}" width="${barW}" height="${Math.max(barH,1)}" rx="3" fill="${fill}" pointer-events="none"/>`;
+    hitAreas += `<rect class="hit-point" x="${padL + i*slot}" y="${padT}" width="${slot}" height="${innerH}" fill="transparent" data-tip="${escAttr(tip)}"/>`;
+  });
+
+  // sparse x-axis labels (avoid crowding): show every label if <= 14 months, else every 2nd/3rd
+  const labelStep = n <= 14 ? 1 : (n <= 28 ? 2 : 3);
+  let labels = '';
+  cad.forEach((c, i) => {
+    if (i % labelStep !== 0 && i !== n-1) return;
+    const x = padL + i*slot + slot/2;
+    labels += `<text x="${x}" y="${h-4}" font-size="9.5" fill="#939598" text-anchor="middle">${fmtMonthShort(c.mes)}${c.mes.slice(2,4) !== cad[0].mes.slice(2,4) && i>0 && c.mes.slice(0,4) !== cad[i-1].mes.slice(0,4) ? " '"+c.mes.slice(2,4) : ''}</text>`;
+  });
+
+  return `
+    <svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <line x1="${padL}" y1="${padT+innerH}" x2="${w-padR}" y2="${padT+innerH}" stroke="rgba(255,255,255,0.1)" stroke-width="1" pointer-events="none"/>
+      ${bars}
+      ${labels}
+      ${hitAreas}
+    </svg>
+  `;
+}
+
+/* ---------------- Month select ---------------- */
+const select = document.getElementById('mesSelect');
+DATA.months.forEach((m, i) => {
+  const opt = document.createElement('option');
+  opt.value = m; opt.textContent = fmtMonth(m);
+  if (i === DATA.months.length - 1) opt.selected = true;
+  select.appendChild(opt);
+});
+
+/* ---------------- Flag taxonomy (Verde/Azul/Amarelo/Vermelha) ---------------- */
+const FLAG_INFO = {
+  verde:    { label: 'Verde',    acao: 'Continuar', color: 'var(--flag-verde)' },
+  azul:     { label: 'Azul',     acao: 'Reciclagem', color: 'var(--flag-azul)' },
+  amarelo:  { label: 'Amarelo',  acao: 'Novo plano de ação', color: 'var(--flag-amarelo)' },
+  vermelha: { label: 'Vermelha', acao: 'Virar indicador', color: 'var(--flag-vermelha)' }
+};
+
+/* Builds the 4-slot flag tracker: filled dots for each evaluation month since
+   DATA.flag_start_month up to mesAte, empty slots for months still to come. */
+function buildFlagDots(team, login, mesAte, isSupervisor) {
+  const idxAte = DATA.months.indexOf(mesAte);
+  const idxStart = DATA.months.indexOf(DATA.flag_start_month);
+  if (idxStart === -1 || idxAte < idxStart) return '';
+
+  const history = [];
+  for (let i = idxStart; i <= idxAte; i++) {
+    const m = DATA.months[i];
+    const md = team.meses[m];
+    let flag = null, na = true, valor = 0, meta = isSupervisor ? 1000000 : 500000;
+    if (isSupervisor) {
+      na = md.supervisor_flag_na; flag = md.supervisor_flag; valor = md.total_supervisor;
+    } else {
+      const c = md.consultores.find(x => x.login === login);
+      if (c) { na = c.flag_na; flag = c.flag; valor = c.valor; }
+    }
+    if (!na && flag) history.push({ mes: m, flag, valor, meta });
+  }
+
+  const maxSlots = 4;
+  const filled = history.slice(-maxSlots);
+  const emptyCount = maxSlots - filled.length;
+
+  let html = '<span class="flag-dots">';
+  filled.forEach(h => {
+    const info = FLAG_INFO[h.flag];
+    const tip = `<div class="tip-title">${fmtMonth(h.mes)} — ${info.label}</div><div class="tip-value">${fmtCurrency(h.valor)}</div><div class="tip-sub">Ação: ${info.acao}</div>`;
+    html += `<span class="hit-point flag-dot-slot filled ${h.flag}" data-tip="${escAttr(tip)}"></span>`;
+  });
+  for (let i = 0; i < emptyCount; i++) {
+    html += `<span class="flag-dot-slot empty" title="Ainda não avaliado"></span>`;
+  }
+  html += '</span>';
+  return html;
+}
+
+/* ---------------- Main render ---------------- */
+function render() {
+  const mes = select.value;
+  const agg = monthlyAgg[mes];
+  const prevIdx = DATA.months.indexOf(mes) - 1;
+  const prevAgg = prevIdx >= 0 ? monthlyAgg[DATA.months[prevIdx]] : null;
+  const selIdx = DATA.months.indexOf(mes);
+
+  document.getElementById('headMonth').textContent = fmtMonth(mes);
+
+  /* ---- KPI cards with sparklines ---- */
+  const seriesVendido = DATA.months.map(m => monthlyAgg[m].totalVendido);
+  const seriesAtivos = DATA.months.map(m => monthlyAgg[m].pctAtivosCons);
+  const seriesMeta = DATA.months.map(m => monthlyAgg[m].pctMetaCons);
+  const seriesSupMeta = DATA.months.map(m => monthlyAgg[m].pctMetaSup);
+
+  const labelsVendido = DATA.months.map(m => {
+    const a = monthlyAgg[m];
+    return `<div class="tip-title">${fmtMonth(m)}</div><div class="tip-value">${fmtCurrency(a.totalVendido)}</div><div class="tip-sub">total vendido pela loja</div>`;
+  });
+  const labelsAtivos = DATA.months.map(m => {
+    const a = monthlyAgg[m];
+    return `<div class="tip-title">${fmtMonth(m)}</div><div class="tip-value">${a.pctAtivosCons.toFixed(1)}%</div><div class="tip-sub">${a.totalAtivos} de ${a.totalRoster} consultores ativos</div>`;
+  });
+  const labelsMeta = DATA.months.map(m => {
+    const a = monthlyAgg[m];
+    return `<div class="tip-title">${fmtMonth(m)}</div><div class="tip-value">${a.pctMetaCons.toFixed(1)}%</div><div class="tip-sub">${a.totalMetaBatida} de ${a.totalRoster} bateram a meta de R$500k</div>`;
+  });
+  const labelsSupMeta = DATA.months.map(m => {
+    const a = monthlyAgg[m];
+    return `<div class="tip-title">${fmtMonth(m)}</div><div class="tip-value">${a.pctMetaSup.toFixed(1)}%</div><div class="tip-sub">${a.supMetaBatida} de ${a.teamsCount} supervisores bateram a meta de R$1M</div>`;
+  });
+  const seriesSupAtivos = DATA.months.map(m => monthlyAgg[m].pctAtivosSup);
+  const labelsSupAtivos = DATA.months.map(m => {
+    const a = monthlyAgg[m];
+    return `<div class="tip-title">${fmtMonth(m)}</div><div class="tip-value">${a.pctAtivosSup.toFixed(1)}%</div><div class="tip-sub">${a.supAtivos} de ${a.teamsCount} supervisores ativos</div>`;
+  });
+
+  function delta(curr, prev) {
+    if (prev === null || prev === undefined) return { txt: '—', cls: 'flat' };
+    if (prev === 0) return curr > 0 ? { txt: '▲ novo', cls: 'up' } : { txt: '—', cls: 'flat' };
+    const pct = ((curr - prev) / Math.abs(prev)) * 100;
+    if (Math.abs(pct) < 0.5) return { txt: '0%', cls: 'flat' };
+    return { txt: (pct > 0 ? '▲ +' : '▼ ') + Math.abs(pct).toFixed(0) + '%', cls: pct > 0 ? 'up' : 'down' };
+  }
+
+  const dVendido = delta(agg.totalVendido, prevAgg && prevAgg.totalVendido);
+  const dAtivos = delta(agg.pctAtivosCons, prevAgg && prevAgg.pctAtivosCons);
+  const dMeta = delta(agg.pctMetaCons, prevAgg && prevAgg.pctMetaCons);
+  const dSupMeta = delta(agg.pctMetaSup, prevAgg && prevAgg.pctMetaSup);
+
+  const kpiGrid = document.getElementById('kpiGrid');
+  kpiGrid.innerHTML = `
+    <div class="glass kpi-card">
+      <div class="kpi-top"><div class="kpi-label">Total vendido</div><div class="kpi-delta ${dVendido.cls}">${dVendido.txt}</div></div>
+      <div class="kpi-value">${fmtCurrencyShort(agg.totalVendido)}</div>
+      <div class="kpi-sub">${teamKeys.length} equipes · loja Belvedere</div>
+      <div class="kpi-spark">${buildSparkline(seriesVendido, labelsVendido, selIdx, '#EE3124')}</div>
+    </div>
+    <div class="glass kpi-card">
+      <div class="kpi-top"><div class="kpi-label">Consultores ativos</div><div class="kpi-delta ${dAtivos.cls}">${dAtivos.txt}</div></div>
+      <div class="kpi-value">${agg.totalAtivos}<span style="font-size:15px;color:var(--grey-mid);font-weight:500;"> / ${agg.totalRoster}</span></div>
+      <div class="kpi-sub">venderam ao menos 1x no mês</div>
+      <div class="kpi-spark">${buildSparkline(seriesAtivos, labelsAtivos, selIdx, '#DCDDDE')}</div>
+    </div>
+    <div class="glass kpi-card">
+      <div class="kpi-top"><div class="kpi-label">Batendo meta (R$500k)</div><div class="kpi-delta ${dMeta.cls}">${dMeta.txt}</div></div>
+      <div class="kpi-value" style="color:var(--success)">${agg.totalMetaBatida}</div>
+      <div class="kpi-sub">de ${agg.totalRoster} consultores no roster</div>
+      <div class="kpi-spark">${buildSparkline(seriesMeta, labelsMeta, selIdx, '#34D399')}</div>
+    </div>
+    <div class="glass kpi-card">
+      <div class="kpi-top"><div class="kpi-label">Supervisores batendo meta</div><div class="kpi-delta ${dSupMeta.cls}">${dSupMeta.txt}</div></div>
+      <div class="kpi-value" style="color:var(--success)">${agg.supMetaBatida}<span style="font-size:15px;color:var(--grey-mid);font-weight:500;"> / ${agg.teamsCount}</span></div>
+      <div class="kpi-sub">meta pessoal de R$1M</div>
+      <div class="kpi-spark">${buildSparkline(seriesSupMeta, labelsSupMeta, selIdx, '#34D399')}</div>
+    </div>
+  `;
+
+  /* ---- Gauges ---- */
+  document.getElementById('gaugeRow').innerHTML = `
+    <div class="glass gauge-card">
+      <div class="gauge-title">% Consultores Ativos</div>
+      ${buildGauge(agg.pctAtivosCons, agg.totalAtivos + ' de ' + agg.totalRoster + ' consultores', 'Consultores ativos — ' + fmtMonth(mes))}
+      <div class="gauge-trend-label">Evolução mensal</div>
+      <div class="gauge-trend">${buildSparkline(seriesAtivos, labelsAtivos, selIdx, '#DCDDDE')}</div>
+    </div>
+    <div class="glass gauge-card">
+      <div class="gauge-title">% Consultores Batendo Meta</div>
+      ${buildGauge(agg.pctMetaCons, agg.totalMetaBatida + ' de ' + agg.totalRoster + ' consultores', 'Consultores batendo meta — ' + fmtMonth(mes))}
+      <div class="gauge-trend-label">Evolução mensal</div>
+      <div class="gauge-trend">${buildSparkline(seriesMeta, labelsMeta, selIdx, '#34D399')}</div>
+    </div>
+    <div class="glass gauge-card">
+      <div class="gauge-title">% Supervisores Ativos</div>
+      ${buildGauge(agg.pctAtivosSup, agg.supAtivos + ' de ' + agg.teamsCount + ' supervisores', 'Supervisores ativos — ' + fmtMonth(mes))}
+      <div class="gauge-trend-label">Evolução mensal</div>
+      <div class="gauge-trend">${buildSparkline(seriesSupAtivos, labelsSupAtivos, selIdx, '#DCDDDE')}</div>
+    </div>
+    <div class="glass gauge-card">
+      <div class="gauge-title">% Supervisores Batendo Meta</div>
+      ${buildGauge(agg.pctMetaSup, agg.supMetaBatida + ' de ' + agg.teamsCount + ' supervisores', 'Supervisores batendo meta — ' + fmtMonth(mes))}
+      <div class="gauge-trend-label">Evolução mensal</div>
+      <div class="gauge-trend">${buildSparkline(seriesSupMeta, labelsSupMeta, selIdx, '#34D399')}</div>
+    </div>
+  `;
+
+  /* ---- Area chart ---- */
+  document.getElementById('chartValue').innerHTML = fmtCurrency(agg.totalVendido) + '<span class="unit">vendido em ' + fmtMonth(mes) + '</span>';
+  document.getElementById('chartWrap').innerHTML = buildAreaChart(mes);
+  document.getElementById('chartAxis').innerHTML = DATA.months.map(m => `<span>${fmtMonthShort(m)}</span>`).join('');
+
+  /* ---- Cadastros chart ---- */
+  const cadNoMes = DATA.cadastros.find(c => c.mes === mes);
+  const cadCount = cadNoMes ? cadNoMes.quantidade : 0;
+  document.getElementById('cadastrosValue').innerHTML = cadCount + '<span class="unit">' + (cadCount === 1 ? 'novo cadastro' : 'novos cadastros') + ' em ' + fmtMonth(mes) + '</span>';
+  document.getElementById('cadastrosWrap').innerHTML = buildCadastrosChart(mes);
+
+  /* ---- Flags (Verde / Azul / Amarelo / Vermelha) ---- */
+  const flagged = [];
+  teamKeys.forEach(k => {
+    const team = DATA.teams[k];
+    const md = team.meses[mes];
+    if (!md.supervisor_flag_na && md.supervisor_flag && md.supervisor_flag !== 'verde') {
+      flagged.push({ nome: team.supervisor, papel: 'Supervisor', equipe: team.nome, valor: md.total_supervisor, meta: 1000000, streak: md.supervisor_streak_sem_meta, flag: md.supervisor_flag });
+    }
+    md.consultores.forEach(c => {
+      if (!c.flag_na && c.flag && c.flag !== 'verde') {
+        flagged.push({ nome: c.nome, papel: 'Consultor', equipe: team.nome, valor: c.valor, meta: 500000, streak: c.streak_sem_meta, flag: c.flag });
+      }
+    });
+  });
+  flagged.sort((a,b) => b.streak - a.streak);
+
+  const flagWrap = document.getElementById('flagTableWrap');
+  if (mes < DATA.flag_start_month) {
+    flagWrap.innerHTML = `<div class="flag-empty">O acompanhamento de bandeiras começou em ${fmtMonth(DATA.flag_start_month)} — não há dados para este mês.</div>`;
+  } else if (flagged.length === 0) {
+    flagWrap.innerHTML = `<div class="flag-empty">Nenhum profissional com bandeira neste mês — todos bateram a meta ou ainda não iniciaram o acompanhamento.</div>`;
+  } else {
+    let rows = '';
+    flagged.forEach(f => {
+      const info = FLAG_INFO[f.flag];
+      rows += `
+        <tr data-searchable="${f.nome} ${f.equipe}">
+          <td><span class="flag-pill ${f.flag}"><span class="flag-dot ${f.flag}"></span>${info.label}</span></td>
+          <td class="name-cell">${f.nome}</td>
+          <td class="meta-cell">${f.papel}</td>
+          <td class="meta-cell">${f.equipe}</td>
+          <td class="valor-cell">${fmtCurrency(f.valor)} <span class="meta-cell">/ meta ${fmtCurrencyShort(f.meta)}</span></td>
+          <td class="meta-cell">${f.streak} ${f.streak === 1 ? 'mês' : 'meses'} sem bater a meta</td>
+          <td><span class="acao-pill">${info.acao}</span></td>
+        </tr>
+      `;
+    });
+    flagWrap.innerHTML = `
+      <table class="dashboard-table">
+        <thead><tr><th>Bandeira</th><th>Nome</th><th>Papel</th><th>Equipe</th><th>Valor no mês</th><th>Situação</th><th>Ação</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+
+  /* ---- Team list ---- */
+  const sortedKeys = [...teamKeys].sort((a,b) => {
+    const ta = DATA.teams[a].meses[mes], tb = DATA.teams[b].meses[mes];
+    return (tb.total_consultores + tb.total_supervisor) - (ta.total_consultores + ta.total_supervisor);
+  });
+
+  const teamList = document.getElementById('teamList');
+  teamList.innerHTML = '';
+  sortedKeys.forEach(k => {
+    const team = DATA.teams[k];
+    const md = team.meses[mes];
+    const card = document.createElement('div');
+    card.className = 'glass team-card';
+    card.setAttribute('data-searchable', team.nome + ' ' + team.supervisor);
+
+    const supBadge = md.supervisor_meta_batida
+      ? `<span class="badge ok">✓ meta batida</span>`
+      : `<span class="badge warn">${fmtCurrency(md.total_supervisor)} / R$1.000.000</span>`;
+
+    card.innerHTML = `
+      <div class="team-summary" data-key="${k}">
+        <span class="chevron">▶</span>
+        <div class="team-name-block">
+          <div class="team-name">${team.nome}</div>
+          <div class="team-sup">Sup: ${team.supervisor}</div>
+        </div>
+        <div class="tstat"><div class="tstat-label">Total equipe (consultores)</div><div class="tstat-value">${fmtCurrency(md.total_consultores)}</div></div>
+        <div class="tstat"><div class="tstat-label">Ativos</div><div class="tstat-value">${md.qtd_ativos} / ${md.qtd_total_roster}</div></div>
+        <div class="tstat"><div class="tstat-label">Batendo meta</div><div class="tstat-value" style="color:${md.qtd_meta_batida>0 ? 'var(--success)':'var(--white)'}">${md.qtd_meta_batida}</div></div>
+        <div class="tstat" style="flex:1.2;"><div class="tstat-label">Supervisor (meta R$1M)</div><div class="tstat-value">${supBadge}</div></div>
+      </div>
+      <div class="team-detail">
+        ${renderDetail(team, md, mes)}
+        ${renderNotesBlock(k, team, mes)}
+      </div>
+    `;
+    card.querySelector('.team-summary').addEventListener('click', () => card.classList.toggle('open'));
+    card.querySelector('textarea.notes-input').addEventListener('input', (e) => {
+      setNote(k, mes, e.target.value);
+    });
+    card.querySelector('.btn-gerar-pdf').addEventListener('click', () => printTeamMinutes(k, team, mes));
+    teamList.appendChild(card);
+  });
+}
+
+/* ---------------- Meeting notes (per team, per month) ---------------- */
+const NOTES_KEY = 'ademicon_belvedere_notas_reuniao';
+let notesData = {};
+try {
+  const saved = localStorage.getItem(NOTES_KEY);
+  if (saved) notesData = JSON.parse(saved);
+} catch (e) { notesData = {}; }
+
+function setNote(teamKey, mes, text) {
+  if (!notesData[teamKey]) notesData[teamKey] = {};
+  notesData[teamKey][mes] = text;
+  try { localStorage.setItem(NOTES_KEY, JSON.stringify(notesData)); } catch (e) {}
+}
+
+function getNote(teamKey, mes) {
+  return (notesData[teamKey] && notesData[teamKey][mes]) || '';
+}
+
+function renderNotesBlock(teamKey, team, mes) {
+  const history = notesData[teamKey] || {};
+  const pastMonths = Object.keys(history).filter(m => m !== mes && history[m] && history[m].trim()).sort();
+
+  let historyHtml = '';
+  if (pastMonths.length > 0) {
+    historyHtml = `
+      <div class="notes-history">
+        <div class="notes-history-title">Anotações de meses anteriores</div>
+        ${pastMonths.map(m => `
+          <div class="notes-history-item">
+            <div class="notes-history-month">${fmtMonth(m)}</div>
+            <div class="notes-history-text">${escAttr(history[m]).replace(/\n/g,'<br>')}</div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  return `
+    <div class="notes-block">
+      <div class="notes-head">
+        <div class="notes-title">📝 Notas da reunião — ${fmtMonth(mes)}</div>
+        <button type="button" class="btn-gerar-pdf">Gerar PDF da ata</button>
+      </div>
+      ${historyHtml}
+      <textarea class="notes-input" placeholder="Anote aqui os pontos discutidos com ${team.supervisor} durante a reunião: combinados, plano de ação, pendências para o próximo mês...">${getNote(teamKey, mes)}</textarea>
+    </div>
+  `;
+}
+
+/* ---------------- PDF / print of a single team's meeting minutes ---------------- */
+function printTeamMinutes(teamKey, team, mes) {
+  const md = team.meses[mes];
+  const notes = getNote(teamKey, mes) || '(sem anotações registradas)';
+  const flagsHtml = md.consultores.filter(c => !c.na).map(c => {
+    const info = c.flag ? FLAG_INFO[c.flag] : null;
+    return `<tr><td>${c.nome}</td><td>${fmtCurrency(c.valor)}</td><td>${info ? info.label : '-'}</td></tr>`;
+  }).join('');
+
+  document.getElementById('printArea').innerHTML = `
+    <div class="print-header">
+      <h1>Ata de Reunião — ${team.nome}</h1>
+      <div>Supervisor: <b>${team.supervisor}</b> · Mês: <b>${fmtMonth(mes)}</b> · Loja Belvedere · Ademicon</div>
+    </div>
+    <div class="print-kpis">
+      <div><span>Total vendido (consultores)</span><b>${fmtCurrency(md.total_consultores)}</b></div>
+      <div><span>Total vendido (supervisor)</span><b>${fmtCurrency(md.total_supervisor)}</b></div>
+      <div><span>Ativos / roster</span><b>${md.qtd_ativos} / ${md.qtd_total_roster}</b></div>
+      <div><span>Batendo meta</span><b>${md.qtd_meta_batida}</b></div>
+    </div>
+    <table class="print-table">
+      <thead><tr><th>Consultor</th><th>Valor</th><th>Bandeira</th></tr></thead>
+      <tbody>${flagsHtml}</tbody>
+    </table>
+    <div class="print-notes">
+      <h2>Notas da reunião</h2>
+      <p>${escAttr(notes).replace(/\n/g,'<br>')}</p>
+    </div>
+  `;
+  window.print();
+}
+
+/* ---------------- Export / import all notes as JSON ---------------- */
+function exportNotes() {
+  const payload = { exportado_em: new Date().toISOString(), loja: 'Belvedere', notas: notesData };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'notas_reuniao_belvedere_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importNotesFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const payload = JSON.parse(e.target.result);
+      const incoming = payload.notas || payload;
+      Object.keys(incoming).forEach(teamKey => {
+        if (!notesData[teamKey]) notesData[teamKey] = {};
+        Object.assign(notesData[teamKey], incoming[teamKey]);
+      });
+      try { localStorage.setItem(NOTES_KEY, JSON.stringify(notesData)); } catch (err) {}
+      render();
+      alert('Notas importadas com sucesso.');
+    } catch (err) {
+      alert('Não consegui ler esse arquivo. Confirme se é um JSON exportado pelo próprio painel.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function renderDetail(team, md, mes) {
+  let rows = '';
+  if (team.supervisor_login) {
+    let cell;
+    if (md.supervisor_meta_batida) cell = `<span class="status-cell"><span class="status-dot dot-green"></span>Meta batida</span>`;
+    else if (md.total_supervisor > 0) cell = `<span class="status-cell"><span class="status-dot dot-amber"></span>Ativo, abaixo da meta</span>`;
+    else cell = `<span class="status-cell"><span class="status-dot dot-gray"></span>Sem venda pessoal no mês</span>`;
+    rows += `
+      <tr class="supervisor-row">
+        <td class="name-cell">${team.supervisor} <span class="meta-cell">(supervisor)</span></td>
+        <td class="valor-cell">${fmtCurrency(md.total_supervisor)}</td>
+        <td class="meta-cell">Meta: R$ 1.000.000</td>
+        <td>${cell}</td>
+        <td>${buildFlagDots(team, team.supervisor_login, mes, true)}</td>
+      </tr>`;
+  }
+  md.consultores.filter(c => !c.na).forEach(c => {
+    let cell;
+    if (c.meta_batida) cell = `<span class="status-cell"><span class="status-dot dot-green"></span>Meta batida</span>`;
+    else if (c.ativo) cell = `<span class="status-cell"><span class="status-dot dot-amber"></span>Ativo, abaixo da meta</span>`;
+    else cell = `<span class="status-cell"><span class="status-dot dot-gray"></span>Inativo no mês</span>`;
+    rows += `
+      <tr>
+        <td class="name-cell">${c.nome}</td>
+        <td class="valor-cell">${fmtCurrency(c.valor)}</td>
+        <td class="meta-cell">Meta: R$ 500.000</td>
+        <td>${cell}</td>
+        <td>${buildFlagDots(team, c.login, mes, false)}</td>
+      </tr>`;
+  });
+  return `
+    <table class="dashboard-table">
+      <thead><tr><th>Consultor</th><th>Valor vendido</th><th>Meta</th><th>Status</th><th>Bandeiras</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  `;
+}
+
+/* ---------------- Mapa da Loja (company-wide view, last 4 evaluation months) ---------------- */
+function addMonths(yyyymm, n) {
+  const [y, m] = yyyymm.split('-').map(Number);
+  const d = new Date(y, m - 1 + n, 1);
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+}
+
+function getFlagForMonth(team, login, mes, isSupervisor) {
+  if (!DATA.months.includes(mes)) return null;
+  const md = team.meses[mes];
+  if (!md) return null;
+  if (isSupervisor) {
+    if (md.supervisor_flag_na) return null;
+    return md.supervisor_flag;
+  }
+  const c = md.consultores.find(x => x.login === login);
+  if (!c || c.flag_na) return null;
+  return c.flag;
+}
+
+function renderMapa() {
+  const windowMonths = [0, 1, 2, 3].map(n => addMonths(DATA.flag_start_month, n));
+  const lastEvalMonth = [...DATA.months].reverse().find(m => m >= DATA.flag_start_month) || null;
+  const lastRosterMonth = DATA.months[DATA.months.length - 1];
+
+  /* ---- Summary counts + stacked bar ---- */
+  const counts = { verde: 0, azul: 0, amarelo: 0, vermelha: 0 };
+  if (lastEvalMonth) {
+    teamKeys.forEach(k => {
+      const team = DATA.teams[k];
+      const md = team.meses[lastEvalMonth];
+      if (!md.supervisor_flag_na && md.supervisor_flag) counts[md.supervisor_flag]++;
+      md.consultores.forEach(c => { if (!c.flag_na && c.flag) counts[c.flag]++; });
+    });
+  }
+  const total = counts.verde + counts.azul + counts.amarelo + counts.vermelha;
+
+  const summaryEl = document.getElementById('mapaSummary');
+  if (total === 0) {
+    summaryEl.innerHTML = `<div class="flag-empty">Ainda sem avaliação — o acompanhamento começa em ${fmtMonth(DATA.flag_start_month)}.</div>`;
+  } else {
+    let segs = '', tiles = '';
+    ['verde','azul','amarelo','vermelha'].forEach(flag => {
+      const c = counts[flag];
+      const pct = (c / total) * 100;
+      const info = FLAG_INFO[flag];
+      if (c > 0) {
+        const tip = `<div class="tip-title">${info.label}</div><div class="tip-value">${c} (${pct.toFixed(0)}%)</div><div class="tip-sub">Ação: ${info.acao}</div>`;
+        segs += `<div class="hit-point map-bar-seg ${flag}" style="width:${pct}%" data-tip="${escAttr(tip)}"></div>`;
+      }
+      tiles += `
+        <div class="map-tile">
+          <span class="flag-dot ${flag}"></span>
+          <div class="map-tile-num">${c}</div>
+          <div class="map-tile-label">${info.label}<span class="map-tile-pct"> · ${total ? pct.toFixed(0) : 0}%</span></div>
+        </div>`;
+    });
+    summaryEl.innerHTML = `
+      <div class="map-bar">${segs}</div>
+      <div class="map-tiles">${tiles}</div>
+      <div class="map-summary-note">Referente a ${fmtMonth(lastEvalMonth)} · ${total} profissionais avaliados na loja Belvedere</div>
+    `;
+  }
+
+  /* ---- Heatmap grid ---- */
+  const sortedKeys = [...teamKeys].sort((a, b) => a.localeCompare(b));
+  let gridHtml = `
+    <div class="map-grid-head">
+      <div class="map-name-col">Profissional</div>
+      ${windowMonths.map(m => `<div class="map-month-col">${fmtMonthShort(m)}${m.slice(0,4) !== windowMonths[0].slice(0,4) ? " '"+m.slice(2,4) : ''}</div>`).join('')}
+    </div>
+  `;
+
+  sortedKeys.forEach(k => {
+    const team = DATA.teams[k];
+    const lastMd = team.meses[lastRosterMonth];
+    gridHtml += `<div class="map-team-header">${team.nome}</div>`;
+
+    if (team.supervisor_login) {
+      gridHtml += buildMapRow(team, team.supervisor_login, team.supervisor + ' (supervisor)', windowMonths, true);
+    }
+    lastMd.consultores.filter(c => !c.na).forEach(c => {
+      gridHtml += buildMapRow(team, c.login, c.nome, windowMonths, false);
+    });
+  });
+
+  document.getElementById('mapaGrid').innerHTML = gridHtml;
+}
+
+function buildMapRow(team, login, displayName, windowMonths, isSupervisor) {
+  let cells = '';
+  windowMonths.forEach(m => {
+    const flag = getFlagForMonth(team, login, m, isSupervisor);
+    if (flag) {
+      const info = FLAG_INFO[flag];
+      const monthData = team.meses[m];
+      const valor = isSupervisor ? monthData.total_supervisor : (monthData.consultores.find(x => x.login === login) || {}).valor;
+      const tip = `<div class="tip-title">${displayName}</div><div class="tip-value">${fmtMonth(m)} — ${info.label}</div><div class="tip-sub">${fmtCurrency(valor || 0)} · Ação: ${info.acao}</div>`;
+      cells += `<div class="hit-point map-cell filled ${flag}" data-tip="${escAttr(tip)}"></div>`;
+    } else {
+      const label = DATA.months.includes(m) ? 'Sem dados' : 'Ainda não avaliado';
+      cells += `<div class="map-cell empty" title="${label}"></div>`;
+    }
+  });
+  return `
+    <div class="map-row" data-searchable="${displayName}">
+      <div class="map-name-col">${displayName}</div>
+      ${cells}
+    </div>
+  `;
+}
+
+/* ---------------- Sidebar nav scrollspy ---------------- */
+const navItems = document.querySelectorAll('.nav-item[data-target]');
+navItems.forEach(item => {
+  item.addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById(item.getAttribute('data-target')).scrollIntoView({ behavior: 'smooth' });
+  });
+});
+const sections = Array.from(document.querySelectorAll('.section'));
+const spy = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navItems.forEach(n => n.classList.toggle('active', n.getAttribute('data-target') === entry.target.id));
+    }
+  });
+}, { rootMargin: '-30% 0px -60% 0px' });
+sections.forEach(s => spy.observe(s));
+
+select.addEventListener('change', render);
+render();
+renderMapa();
+
+/* ---------------- Notes export/import controls ---------------- */
+document.getElementById('btnExportNotes').addEventListener('click', exportNotes);
+document.getElementById('fileImportNotes').addEventListener('change', (e) => {
+  if (e.target.files && e.target.files[0]) importNotesFile(e.target.files[0]);
+  e.target.value = '';
+});
+
+</script>
+
+</body>
+</html>
